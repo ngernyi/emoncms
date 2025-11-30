@@ -100,81 +100,80 @@ global $path;
 
 <script>
     var users = {};
+    var page = 1;
+    var orderby = "id";
+    var order = "ascending";
+    var searchq = false;
+    var users_per_page = 250;
 
     var admin = {
 
-        'numberofusers': function() {
-            var result = 0;
+        'numberofusers': function(callback) {
             $.ajax({
                 url: path + "admin/numberofusers.json",
                 dataType: 'text',
-                async: false,
+                async: true,
                 success: function(data) {
-                    result = data;
+                    callback(data);
                 }
             });
-            return result;
         },
 
-        'userlist': function(page, perpage, orderby, order, searchq) {
+        'userlist': function(page, perpage, orderby, order, searchq, callback) {
             console.log("userlist: " + page + " " + perpage + " " + orderby + " " + searchq);
             var searchstr = "";
             if (searchq != false) searchstr = "&search=" + encodeURIComponent(searchq);
-            var result = {};
             $.ajax({
                 url: path + "admin/userlist.json?page=" + (page - 1) + "&perpage=" + perpage + "&orderby=" + orderby + "&order=" + order + searchstr,
                 dataType: 'json',
-                async: false,
+                async: true,
                 success: function(data) {
-                    result = data;
+                    callback(data);
                 }
             });
-            return result;
         }
     }
 
-    // -------------------------------------------------------------------------------------------
-
-    var number_of_users = admin.numberofusers();
-    var users_per_page = 250;
-    var number_of_pages = Math.ceil(number_of_users / users_per_page);
-    var orderby = "id";
-    var page = 1;
-    var order = "ascending";
-    var searchq = false;
-
-    var out = "";
-    for (var z = 0; z < number_of_pages; z++) {
-        out += '<li><a class="pageselect" href="#">' + (z + 1) + '</a></li>';
+    function refresh_user_list() {
+        admin.userlist(page, users_per_page, orderby, order, searchq, function(data){
+            users = data;
+            table_draw();
+        });
     }
-    $(".pagination").find("ul").html(out);
-    $("#numberofusers").html(number_of_users);
 
-    users = admin.userlist(page, 250, orderby, order, searchq);
-    table_draw();
+    // -------------------------------------------------------------------------------------------
+    admin.numberofusers(function(number_of_users){
+        var number_of_pages = Math.ceil(number_of_users / users_per_page);
+
+        var out = "";
+        for (var z = 0; z < number_of_pages; z++) {
+            out += '<li><a class="pageselect" href="#">' + (z + 1) + '</a></li>';
+        }
+        $(".pagination").find("ul").html(out);
+        $("#numberofusers").html(number_of_users);
+
+        refresh_user_list();
+    });
+
 
     $(".pagination").on("click", ".pageselect", function() {
         page = $(this).html();
-        users = admin.userlist(page, 250, orderby, order, searchq);
-        table_draw();
+        refresh_user_list();
     });
 
     $("#orderby").change(function() {
         orderby = $(this).val();
-        users = admin.userlist(page, 250, orderby, order, searchq);
-        table_draw();
+        refresh_user_list();
     });
 
     $("#order").change(function() {
         order = $(this).val();
-        users = admin.userlist(page, 250, orderby, order, searchq);
-        table_draw();
+        refresh_user_list();
     });
 
     $("#user-search").click(function() {
         searchq = $("#user-search-key").val();
-        users = admin.userlist(page, 250, orderby, order, searchq);
-        table_draw();
+        refresh_user_list();
     });
 
     function table_draw() {
@@ -242,7 +241,7 @@ global $path;
                 timezone: encodeURIComponent(user_timezone)
             },
             dataType: 'json',
-            async: false,
+            async: true,
             success: function(result) {
                 if (result.success == undefined) {
                     $("#add-user-error").html(result);
@@ -251,8 +250,7 @@ global $path;
                 } else {
                     if (result.success) {
                         $('#addNewUserModal').modal('hide');
-                        users = admin.userlist(page, 250, orderby, order, searchq);
-                        table_draw();
+                        refresh_user_list();
                         return;
                     } else {
                         $("#add-user-error").html(result.message);
