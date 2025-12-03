@@ -25,6 +25,9 @@ $emoncms_version = ($settings['feed']['redisbuffer']['enabled'] ? "low-write " :
 $path = get_application_path($settings["domain"]);
 $sidebarFixed = true;
 
+require_once "Lib/Config.php";
+Config::load("settings.ini");
+
 require "Lib/EmonLogger.php";
 $log = new EmonLogger(__FILE__);
 

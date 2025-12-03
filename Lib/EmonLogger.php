@@ -28,26 +28,25 @@ class EmonLogger
 
     public function __construct($clientFileName)
     {
-        global $settings;
-
-        if (!$settings['log']['enabled']) {
+        // Refactored to use the Config class
+        if (!Config::get_bool('log', 'enabled', false)) {
             $this->logenabled = false;
-        } else {
-            $this->logfile = $settings['log']['location']."/emoncms.log";
-            if ($settings['log']['level']) {
-                $this->log_level = $settings['log']['level'];
-            }
-            $this->caller = basename($clientFileName);
-            if (!file_exists($this->logfile)) {
-                $fh = @fopen($this->logfile, "a");
-                if (!$fh) {
-                   error_log("Log file could not be created");
-                } else {
-                   @fclose($fh);
-                }
-            }
-            $this->logenabled = is_writable($this->logfile);
+            return;
         }
+
+        $this->logfile = Config::get('log', 'location', '/var/log/emoncms') . "/emoncms.log";
+        $this->log_level = Config::get('log', 'level', 2); // Default to WARN
+        $this->caller = basename($clientFileName);
+
+        if (!file_exists($this->logfile)) {
+            $fh = @fopen($this->logfile, "a");
+            if (!$fh) {
+               error_log("Log file could not be created at " . $this->logfile);
+            } else {
+               @fclose($fh);
+            }
+        }
+        $this->logenabled = is_writable($this->logfile);
     }
     
     public function set($logfile, $log_level)
