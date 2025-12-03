@@ -12,7 +12,7 @@ http://openenergymonitor.org
 */
 
 define('EMONCMS_EXEC', 1);
-chdir("/var/www/emoncms");
+chdir(dirname(__FILE__)."/..");
 require "process_settings.php";
 require_once "Lib/Config.php";
 Config::load(dirname(__FILE__)."/../settings.ini");
