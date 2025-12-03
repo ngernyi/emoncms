@@ -3,53 +3,53 @@
 
 var input = {
 
-    'list':function()
+    'list':function(callback)
     {
-        var result = {};
-        $.ajax({ url: path+"input/list.json", dataType: 'json', async: false, success: function(data) {result = data;} });
-        return result;
+        $.ajax({ url: path+"input/list.json", dataType: 'json', async: true, success: function(data) {
+            if (callback) callback(data);
+        } });
     },
 
-    'list_assoc':function()
+    'list_assoc':function(callback)
     {
-        var result = {};
-        $.ajax({ url: path+"input/list.json", dataType: 'json', async: false, success: function(data) {result = data;} });
-
-        var inputs = {};
-        for (z in result) inputs[result[z].id] = result[z];
-
-        return inputs;
-    },
-    // now returns promise if async == true
-    'set':function(id, fields, async)
-    {
-        async = async || false
-        var result = {};
-        var options = { 
-            url: path+"input/set.json",
-            data: "inputid="+id+"&fields="+JSON.stringify(fields)
-        }
-        if(!async) options.async = false
-        var jqxhr = $.ajax(options)
-        .done(function(response){
-            result = response
-            if (!result.success) alert(result.message);
-        })
-        .error(function(msg){
-            alert('Error saving data. '+msg)
-        })
-        // return the synchronous result or the asynchronous promise
-        return !async ? result : jqxhr;
-    },
-
-    'remove':function(id)
-    {
-        $.ajax({ url: path+"input/delete.json", data: "inputid="+id, async: false, success: function(data){} });
+        $.ajax({ url: path+"input/list.json", dataType: 'json', async: true, success: function(data) {
+            var inputs = {};
+            for (var z in data) inputs[data[z].id] = data[z];
+            if (callback) callback(inputs);
+        } });
     },
     
-    'delete_multiple':function(ids)
+    'set':function(id, fields, callback)
     {
-        $.ajax({ url: path+"input/delete.json", data: "inputids="+JSON.stringify(ids), async: false, success: function(data){} });
+        var options = { 
+            url: path+"input/set.json",
+            data: "inputid="+id+"&fields="+JSON.stringify(fields),
+            async: true
+        }
+        
+        $.ajax(options)
+        .done(function(response){
+            if (!response.success) alert(response.message);
+            if (callback) callback(response);
+        })
+        .error(function(msg){
+            alert('Error saving data. '+msg);
+            if (callback) callback({success:false, message:msg});
+        })
+    },
+
+    'remove':function(id, callback)
+    {
+        $.ajax({ url: path+"input/delete.json", data: "inputid="+id, async: true, success: function(data){
+            if (callback) callback(data);
+        } });
+    },
+    
+    'delete_multiple':function(ids, callback)
+    {
+        $.ajax({ url: path+"input/delete.json", data: "inputids="+JSON.stringify(ids), async: true, success: function(data){
+            if (callback) callback(data);
+        } });
     },
 
     delete_multiple_async: function(ids) {
@@ -58,36 +58,36 @@ var input = {
 
     // Process
 
-    'set_process':function(inputid,processlist)
+    'set_process':function(inputid,processlist, callback)
     {
         let json_processlist = JSON.stringify(processlist);
-        var result = {};
-        $.ajax({ url: path+"input/process/set.json?inputid="+inputid, method: "POST", data: "processlist="+json_processlist, async: false, success: function(data){result = data;} });
-        return result;
+        $.ajax({ url: path+"input/process/set.json?inputid="+inputid, method: "POST", data: "processlist="+json_processlist, async: true, success: function(data){
+            if (callback) callback(data);
+        } });
     },
 
-    'get_process':function(inputid)
+    'get_process':function(inputid, callback)
     {
-        var result = {};
-        $.ajax({ url: path+"input/process/get.json", data: "inputid="+inputid, async: false, dataType: 'json', success: function(data){result = data;} });
-        var processlist = [];
-        if (result!="")
-        {
-            var tmp = result.split(",");
-            for (n in tmp)
+        $.ajax({ url: path+"input/process/get.json", data: "inputid="+inputid, async: true, dataType: 'json', success: function(data){
+            var processlist = [];
+            if (data!="")
             {
-                var process = tmp[n].split(":"); 
-                processlist.push(process);
+                var tmp = data.split(",");
+                for (var n in tmp)
+                {
+                    var process = tmp[n].split(":"); 
+                    processlist.push(process);
+                }
             }
-        }
-        return processlist;
+            if (callback) callback(processlist);
+        } });
     },
 
-    'reset_processlist':function(inputid,processid)
+    'reset_processlist':function(inputid, callback)
     {
-        var result = {};
-        $.ajax({ url: path+"input/process/reset.json", data: "inputid="+inputid, async: false, success: function(data){result = data;} });
-        return result;
+        $.ajax({ url: path+"input/process/reset.json", data: "inputid="+inputid, async: true, success: function(data){
+            if (callback) callback(data);
+        } });
     }
 
 }

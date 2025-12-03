@@ -946,7 +946,7 @@ function update_inputs() {
                 
                 if (DEVICE_MODULE) {
                     // Device creation
-                    $.ajax({ url: path+"device/create.json?nodeid="+nodeid, dataType: 'json', async: false, success: function(result) {
+                    $.ajax({ url: path+"device/create.json?nodeid="+nodeid, dataType: 'json', async: true, success: function(result) {
                         if (result.success!=undefined) {
                             //alert("There was an error creating device: nodeid="+nodeid+" message="+result.message); 
                             console.error("There was an error creating device: nodeid="+nodeid+" message="+result.message);

@@ -91,43 +91,48 @@ view.end = (new Date()).getTime(); //Get end time
 view.limit_x = false;
 
 // Create feed selector
-var feeds = feed.list();
-// feeds by tag
-var feeds_by_tag = {};
-var feeds_by_id = {};
-for (var z in feeds) {
-    var tag = feeds[z].tag;
-    if (!feeds_by_tag[tag]) feeds_by_tag[tag] = [];
-    // check that engine is not virtual
-    if (feeds[z].engine != 7) { 
-        feeds_by_tag[tag].push(feeds[z]);
+var feeds = {};
+feed.list(function(data){
+    feeds = data;
+    // feeds by tag
+    var feeds_by_tag = {};
+    var feeds_by_id = {};
+    for (var z in feeds) {
+        var tag = feeds[z].tag;
+        if (!feeds_by_tag[tag]) feeds_by_tag[tag] = [];
+        // check that engine is not virtual
+        if (feeds[z].engine != 7) { 
+            feeds_by_tag[tag].push(feeds[z]);
+        }
+        feeds_by_id[feeds[z].id] = feeds[z];
     }
-    feeds_by_id[feeds[z].id] = feeds[z];
-}
-// populate feed selector with optgroups by tag
-var feedselector = $("#feedselector");
-for (var tag in feeds_by_tag) {
-    var optgroup = $("<optgroup label='"+tag+"'>");
-    for (var z in feeds_by_tag[tag]) {
-        var f = feeds_by_tag[tag][z];
-        optgroup.append("<option value='"+f.id+"'>"+f.name+"</option>");
+    // populate feed selector with optgroups by tag
+    var feedselector = $("#feedselector");
+    for (var tag in feeds_by_tag) {
+        var optgroup = $("<optgroup label='"+tag+"'>");
+        for (var z in feeds_by_tag[tag]) {
+            var f = feeds_by_tag[tag][z];
+            optgroup.append("<option value='"+f.id+"'>"+f.name+"</option>");
+        }
+        feedselector.append(optgroup);
     }
-    feedselector.append(optgroup);
-}
-// select current feed
-feedselector.val(feedid);
+    // select current feed
+    feedselector.val(feedid);
 
-var feed_interval = false;
-var meta = feed.getmeta(feedid);
-if (meta) {
-    feed_interval = meta.interval;
-    view.end = meta.end_time * 1000;
-    view.start = view.end - timeWindow;
-}
-var plotdata = {};
+    var feed_interval = false;
+    feed.getmeta(feedid, function(meta){
+        if (meta) {
+            feed_interval = meta.interval;
+            view.end = meta.end_time * 1000;
+            view.start = view.end - timeWindow;
+        }
+        var plotdata = {};
 
-resize();
-vis_feed_data();
+        resize();
+        vis_feed_data();
+    });
+});
+
 
 function vis_feed_data() {
     view.calc_interval(1200);
@@ -251,9 +256,10 @@ $("#graph").bind("plotclick", function(event, pos, item) {
 $("#feedselector").change(function() {
     feedid = $(this).val();
     $("#feed_name").html(feeds_by_id[feedid].name);
-    var meta = feed.getmeta(feedid);
-    if (meta) feed_interval = meta.interval;
-    vis_feed_data();
+    feed.getmeta(feedid, function(meta){
+        if (meta) feed_interval = meta.interval;
+        vis_feed_data();
+    });
 });
 
 // Show hide csv
@@ -351,10 +357,11 @@ $('#okb').click(function() {
         url: path + 'feed/post.json',
         data: "&apikey=" + apikey + "&id=" + feedid + "&time=" + time + "&value=" + newvalue + "&skipbuffer=1",
         dataType: 'json',
-        async: false,
-        success: function() {}
+        async: true,
+        success: function() {
+            vis_feed_data();
+        }
     });
-    vis_feed_data();
 });
 
 $('#multiply-submit').click(function() {
@@ -365,12 +372,12 @@ $('#multiply-submit').click(function() {
         url: path + 'feed/scalerange.json',
         data: "&apikey=" + apikey + "&id=" + feedid + "&start=" + parseInt(view.start*0.001) + "&end=" + parseInt(view.end*0.001) + "&value=" + multiplyvalue,
         dataType: 'json',
-        async: false,
+        async: true,
         success: function(result) {
             alert(result)
+            vis_feed_data();
         }
     });
-    vis_feed_data();
 });
 
 $('#delete-button').click(function() {

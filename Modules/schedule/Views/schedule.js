@@ -1,35 +1,37 @@
 var schedule = {
     
-    'list':function()
+    'list':function(callback)
     {
-        var result = {};
-        $.ajax({ url: path+"schedule/list.json", dataType: 'json', async: false, success: function(data) {result = data;} });
-        return result;
+        $.ajax({ url: path+"schedule/list.json", dataType: 'json', async: true, success: function(data) {
+            if (callback) callback(data);
+        } });
     },
 
-    'get':function(id)
+    'get':function(id, callback)
     {
-        var result = {};
-        $.ajax({ url: path+"schedule/get.json", data: "id="+id, async: false, success: function(data){ result = data;} });
-        return result;
+        $.ajax({ url: path+"schedule/get.json", data: "id="+id, async: true, success: function(data){ 
+            if (callback) callback(data);
+        } });
     },
 
-    'set':function(id, fields)
+    'set':function(id, fields, callback)
     {
-        var result = {};
-        $.ajax({ url: path+"schedule/set.json", data: "id="+id+"&fields="+JSON.stringify(fields), async: false, success: function(data) {result = data;} });
-        return result;
+        $.ajax({ url: path+"schedule/set.json", data: "id="+id+"&fields="+JSON.stringify(fields), async: true, success: function(data) {
+            if (callback) callback(data);
+        } });
     },
 
-    'remove':function(id)
+    'remove':function(id, callback)
     {
-        $.ajax({ url: path+"schedule/delete.json", data: "id="+id, async: false, success: function(data){} });
+        $.ajax({ url: path+"schedule/delete.json", data: "id="+id, async: true, success: function(data){
+            if (callback) callback(data);
+        } });
     },
     
-    'test':function(id)
+    'test':function(id, callback)
     {
-        var result = {};
-        $.ajax({ url: path+"schedule/test.json", data: "id="+id, async: false, success: function(data){result = data;} });
-        return result;
+        $.ajax({ url: path+"schedule/test.json", data: "id="+id, async: true, success: function(data){
+            if (callback) callback(data);
+        } });
     }
 }

@@ -1,39 +1,39 @@
 
 var multigraph = {
 
-  'new':function(id)
+  'new':function(callback)
   {
-    var result = {};
-    $.ajax({ url: path+"vis/multigraph/new.json", async: false, success: function(data){result = data;} });
-    return result;
+    $.ajax({ url: path+"vis/multigraph/new.json", async: true, success: function(data){
+        if (callback) callback(data);
+    } });
   },
 
-  'set':function(id,feedlist,name)
+  'set':function(id,feedlist,name, callback)
   {
-    var result = {};
-    $.ajax({ url: path+"vis/multigraph/set.json", data: "id="+id+"&name="+encodeURIComponent(name)+"&feedlist="+encodeURIComponent(JSON.stringify(feedlist)), async: false, success: function(data){result = data;} });
-    return result;
+    $.ajax({ url: path+"vis/multigraph/set.json", data: "id="+id+"&name="+encodeURIComponent(name)+"&feedlist="+encodeURIComponent(JSON.stringify(feedlist)), async: true, success: function(data){
+        if (callback) callback(data);
+    } });
   },
 
-  'get':function(id)
+  'get':function(id, callback)
   {
-    var result = {};
-    $.ajax({ url: path+"vis/multigraph/get.json", data: "id="+id, dataType: 'json', async: false, success: function(data){result = data;} });
-    return result;
+    $.ajax({ url: path+"vis/multigraph/get.json", data: "id="+id, dataType: 'json', async: true, success: function(data){
+        if (callback) callback(data);
+    } });
   },
 
-  'remove':function(id)
+  'remove':function(id, callback)
   {
-    var result = {};
-    $.ajax({ url: path+"vis/multigraph/delete.json", data: "id="+id, async: false, success: function(data){result = data;} });
-    return result;
+    $.ajax({ url: path+"vis/multigraph/delete.json", data: "id="+id, async: true, success: function(data){
+        if (callback) callback(data);
+    } });
   },
 
-  'getlist':function()
+  'getlist':function(callback)
   {
-    var result = {};
-    $.ajax({ url: path+"vis/multigraph/getlist.json", async: false, dataType: 'json', success: function(data){result = data;} });
-    return result;
+    $.ajax({ url: path+"vis/multigraph/getlist.json", async: true, dataType: 'json', success: function(data){
+        if (callback) callback(data);
+    } });
   }
 
 }

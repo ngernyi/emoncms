@@ -114,11 +114,12 @@
 
   $("#table").bind("onSave", function(e,id,fields_to_update){
     $('#schedule-loader').show();
-    var result = schedule.set(id,fields_to_update);
-    if (!result.success) {
-         alert(result.message);
-    }
-    $('#schedule-loader').hide();
+    schedule.set(id,fields_to_update, function(result){
+        if (!result.success) {
+             alert(result.message);
+        }
+        $('#schedule-loader').hide();
+    });
   });
 
   $("#table").bind("onResume", function(e){
@@ -135,9 +136,10 @@
   {
     var id = $('#scheduleDeleteModal').attr('scheduleid');
     var row = $('#scheduleDeleteModal').attr('schedulerow');
-    schedule.remove(id);
-    table.remove(row);
-    update();
+    schedule.remove(id, function(){
+        table.remove(row);
+        update();
+    });
 
     $('#scheduleDeleteModal').modal('hide');
   });
@@ -159,8 +161,8 @@
   $("#table").on('click', '.icon-eye-open', function() {
     var i = table.data[$(this).attr('row')];
     console.log(i);
-    var result = schedule.test(i['id']);
-    alert("Schedule expression returned '" + result['result'] +"'.\n\nDetails:\n"+ result['debug']);
-
+    schedule.test(i['id'], function(result){
+        alert("Schedule expression returned '" + result['result'] +"'.\n\nDetails:\n"+ result['debug']);
+    });
   });
 </script>
