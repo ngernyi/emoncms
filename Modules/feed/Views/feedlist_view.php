@@ -14,6 +14,9 @@
     }
 ?>
 
+<!-- Bootstrap 5 (scoped to this view) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
 <script src="<?php echo $path; ?>Lib/vue.min.js"></script>
 
@@ -140,41 +143,84 @@ body{padding:0!important}
 }
 
 </style>
-<div id="feed-header">
-    <span id="api-help" style="float:right"><a href="<?php echo $path.$public_username_str; ?>feed/api"><?php echo tr('Feed API Help'); ?></a></span>
-    <h3 id="feeds-title"><?php echo tr('Feeds'); ?></h3>
-    <h3 id="public-feeds-title" class="hide"><?php echo tr('Public Feeds'); ?></h3>
+
+<div id="feed-header" class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3 id="feeds-title" class="mb-0"><?php echo tr('Feeds'); ?></h3>
+        <h3 id="public-feeds-title" class="hide mb-0"><?php echo tr('Public Feeds'); ?></h3>
+    </div>
+    <span id="api-help" class="ms-3">
+        <a href="<?php echo $path.$public_username_str; ?>feed/api" class="link-primary"><?php echo tr('Feed API Help'); ?></a>
+    </span>
 </div>
 
-<input type="text" name="filter" id="filter" placeholder="Filter feeds" style="float:right">
+<input
+    type="text"
+    name="filter"
+    id="filter"
+    placeholder="Filter feeds"
+    class="form-control form-control-sm mb-3"
+    style="max-width:250px; float:right">
 
-<div class="controls" data-spy="affix" data-offset-top="100">
-    <button id="expand-collapse-all" class="btn" title="<?php echo tr('Collapse') ?>" data-alt-title="<?php echo tr('Expand') ?>"><i class="icon icon-resize-small"></i></button>
-    <button id="select-all" class="btn" title="<?php echo tr('Select all') ?>" data-alt-title="<?php echo tr('Unselect all') ?>"><i class="icon icon-check"></i></button>
-    <button class="btn feed-edit hide" title="<?php echo tr('Edit') ?>"><i class="icon-pencil"></i></button>
-    <button class="btn feed-delete hide" title="<?php echo tr('Delete') ?>"><i class="icon-trash" ></i></button>
-    <button class="btn feed-downsample hide" title="<?php echo tr('Downsample') ?>"><i class="icon-repeat"></i></button>
-    <button class="btn feed-download hide" title="<?php echo tr('Download') ?>"><i class="icon-download"></i></button>
-    <button class="btn feed-graph hide" title="<?php echo tr('Graph view') ?>"><i class="icon-eye-open"></i></button>
-    <button class="btn feed-process hide" title="<?php echo tr('Process config') ?>"><i class="icon-wrench"></i></button>
-
+<div class="controls d-flex flex-wrap gap-2 align-items-center py-2" data-spy="affix" data-offset-top="100">
+    <button
+        id="expand-collapse-all"
+        class="btn btn-outline-secondary btn-sm"
+        title="<?php echo tr('Collapse') ?>"
+        data-alt-title="<?php echo tr('Expand') ?>">
+        <i class="icon icon-resize-small"></i>
+    </button>
+    <button
+        id="select-all"
+        class="btn btn-outline-primary btn-sm"
+        title="<?php echo tr('Select all') ?>"
+        data-alt-title="<?php echo tr('Unselect all') ?>">
+        <i class="icon icon-check"></i>
+    </button>
+    <button class="btn btn-warning btn-sm feed-edit hide" title="<?php echo tr('Edit'); ?>">
+        <i class="icon-pencil"></i>
+    </button>
+    <button class="btn btn-danger btn-sm feed-delete hide" title="<?php echo tr('Delete'); ?>">
+        <i class="icon-trash"></i>
+    </button>
+    <button class="btn btn-info btn-sm feed-downsample hide" title="<?php echo tr('Downsample'); ?>">
+        <i class="icon-repeat"></i>
+    </button>
+    <button class="btn btn-success btn-sm feed-download hide" title="<?php echo tr('Download'); ?>">
+        <i class="icon-download"></i>
+    </button>
+    <button class="btn btn-secondary btn-sm feed-graph hide" title="<?php echo tr('Graph view'); ?>">
+        <i class="icon-eye-open"></i>
+    </button>
+    <button class="btn btn-outline-dark btn-sm feed-process hide" title="<?php echo tr('Process config'); ?>">
+        <i class="icon-wrench"></i>
+    </button>
 </div>
 
 <div id="table" class="feed-list"></div>
 
-<div id="feed-none" class="alert alert-block hide">
-    <h4 class="alert-heading"><?php echo tr('No feeds created'); ?></h4>
-    <p><?php echo tr('Feeds are where your monitoring data is stored. The route for creating storage feeds is to start by creating inputs (see the inputs tab). Once you have inputs you can either log them straight to feeds or if you want you can add various levels of input processing to your inputs to create things like daily average data or to calibrate inputs before storage. Alternatively you can create Virtual feeds, this is a special feed that allows you to do post processing on existing storage feeds data, the main advantage is that it will not use additional storage space and you may modify post processing list that gets applyed on old stored data. You may want the next link as a guide for generating your request: '); ?><a href="api"><?php echo tr('Feed API helper'); ?></a></p>
+<div id="feed-none" class="alert alert-warning alert-block hide mt-3">
+    <h4 class="alert-heading mb-2"><?php echo tr('No feeds created'); ?></h4>
+    <p class="mb-0">
+        <?php echo tr('Feeds are where your monitoring data is stored. The route for creating storage feeds is to start by creating inputs (see the inputs tab). Once you have inputs you can either log them straight to feeds or if you want you can add various levels of input processing to your inputs to create things like daily average data or to calibrate inputs before storage. Alternatively you can create Virtual feeds, this is a special feed that allows you to do post processing on existing storage feeds data, the main advantage is that it will not use additional storage space and you may modify post processing list that gets applyed on old stored data. You may want the next link as a guide for generating your request: '); ?>
+        <a href="api"><?php echo tr('Feed API helper'); ?></a>
+    </p>
 </div>
 
-<div id="public-feeds-none" class="alert alert-block hide">
-    <h4 class="alert-heading"><?php echo tr('No public feeds available'); ?></h4>
+<div id="public-feeds-none" class="alert alert-info alert-block hide mt-3">
+    <h4 class="alert-heading mb-0"><?php echo tr('No public feeds available'); ?></h4>
 </div>
 
-<div id="feed-footer">
-    <button id="refreshfeedsize" class="btn btn-small" ><i class="icon-refresh" ></i>&nbsp;<?php echo tr('Refresh feed size'); ?></button>
-    <button id="addnewfeed" class="btn btn-small" data-toggle="modal" data-target="#newFeedNameModal"><i class="icon-plus-sign" ></i>&nbsp;<?php echo tr('New feed'); ?></button>
-    <button id="importdata" class="btn btn-small" data-toggle="modal" data-target="#importDataModal"><i class="icon-arrow-up" ></i>&nbsp;<?php echo tr('Import data'); ?></button>
+<div id="feed-footer" class="mt-3 d-flex flex-wrap gap-2">
+    <button id="refreshfeedsize" class="btn btn-outline-secondary btn-sm btn-small">
+        <i class="icon-refresh"></i>&nbsp;<?php echo tr('Refresh feed size'); ?>
+    </button>
+    <button id="addnewfeed" class="btn btn-primary btn-sm btn-small" data-toggle="modal" data-target="#newFeedNameModal">
+        <i class="icon-plus-sign"></i>&nbsp;<?php echo tr('New feed'); ?>
+    </button>
+    <button id="importdata" class="btn btn-outline-primary btn-sm btn-small" data-toggle="modal" data-target="#importDataModal">
+        <i class="icon-arrow-up"></i>&nbsp;<?php echo tr('Import data'); ?>
+    </button>
 </div>
 <div id="feed-loader" class="ajax-loader"></div>
 
@@ -1355,4 +1401,3 @@ var str_large_download = "<?php echo tr('Estimated download file size is large.'
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/Views/exporter.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/Views/importer.js?v=2"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/Views/downsample.js?v=2"></script>
-
