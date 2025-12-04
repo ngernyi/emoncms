@@ -1,10 +1,8 @@
 <?php $v=31; 
 defined('EMONCMS_EXEC') or die('Restricted access');
 ?>
-<!-- Bootstrap 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Load dependencies -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <?php if ($device_module) { ?>
     <script src="<?php echo $path; ?>Modules/device/Views/device.js?v=28"></script>
 <?php } ?>
@@ -15,7 +13,6 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 <script src="<?php echo $path; ?>Lib/vue.min.js"></script>
 <link rel="stylesheet" href="<?php echo $path; ?>Modules/input/Views/input_view.css?v=<?php echo $v; ?>">
 
-<!-- PHP code to determine if the device module is installed AND translations -->
 <script>
     var path = "<?php echo $path; ?>";
     const DEVICE_MODULE = <?php if ($device_module) echo 'true';
@@ -50,6 +47,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
     }
 </script>
 
+<div class="bs5">
 <div class="position-relative">
     <div id="input-header" class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0"><?php echo tr('Inputs'); ?></h3>
@@ -64,7 +62,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
             id="expand-collapse-all"
             class="btn btn-outline-secondary btn-sm"
             :title="collapse_title">
-            <i class="icon" :class="{'icon-resize-small': collapsed.length < total_devices, 'icon-resize-full': collapsed.length >= total_devices}"></i>
+            <i class="icon bi" :class="{'bi-arrows-collapse': collapsed.length < total_devices, 'bi-arrows-expand': collapsed.length >= total_devices}"></i>
         </button>
 
         <button
@@ -80,42 +78,40 @@ defined('EMONCMS_EXEC') or die('Restricted access');
         <button
             @click="open_delete"
             class="btn btn-danger btn-sm input-delete"
-            :class="{'hide': !selectMode}"
+            :class="{'d-none': !selectMode}"
             title="<?php echo tr('Delete'); ?>">
-            <i class="icon-trash"></i>
+            <i class="bi bi-trash"></i>
         </button>
 
         <button
             @click="open_edit"
             class="btn btn-warning btn-sm input-edit"
-            :class="{'hide': !selectMode}"
+            :class="{'d-none': !selectMode}"
             title="<?php echo tr('Edit'); ?>">
-            <i class="icon-pencil"></i>
+            <i class="bi bi-pencil"></i>
         </button>
 
-        <!-- input processing configure only show if one input selected -->
         <button
             v-if="selectMode && selected.length === 1"
             @click="showInputConfigure(selected[0])"
             class="btn btn-info btn-sm input-configure"
             :title="'<?php echo addslashes(tr('Configure Input processing')); ?>'">
-            <i class="icon-wrench"></i>
+            <i class="bi bi-gear"></i>
         </button>
 
         <button
             v-if="show_clean"
             @click="clean_unused"
-            class="btn btn-success btn-sm pull-right"
+            class="btn btn-success btn-sm float-end"
             title="<?php echo tr('Clean unused devices'); ?>">
-            <i class="icon-leaf"></i>
+            <i class="bi bi-arrow-repeat"></i>
         </button>
     </div>
 
-    <div id="noprocesses clearfix"></div>
+    <div id="noprocesses"></div>
 
     <div id="app" v-cloak class="mt-4">
 
-        <!-- alert danger if input creation is disabled for user, click enable button to enable -->
         <div v-if="input_creation_disabled" class="alert alert-danger d-flex justify-content-between align-items-center">
             <div class="me-3">
                 <?php echo tr('<b>Input creation disabled:</b> Enable to add new inputs & devices'); ?>
@@ -123,7 +119,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
             <button
                 @click="enableInputCreation"
                 class="btn btn-primary btn-sm">
-                <i class="icon icon-play" style="margin-top:2px"></i>
+                <i class="bi bi-play-fill" style="margin-top:2px"></i>
                 <?php echo tr('Enable Input Creation'); ?>
             </button>
         </div>
@@ -144,8 +140,8 @@ defined('EMONCMS_EXEC') or die('Restricted access');
                         <div class="select text-center has-indicator" data-col="B">
                             <span
                                 v-if="!selectMode || getDeviceInputIds(device) == 0"
-                                class="icon-indicator"
-                                :class="{'icon-chevron-down': isCollapsed(nodeid),'icon-chevron-up': !isCollapsed(nodeid)}"></span>
+                                class="icon-indicator bi"
+                                :class="{'bi-chevron-down': isCollapsed(nodeid),'bi-chevron-up': !isCollapsed(nodeid)}"></span>
                             <input
                                 v-else
                                 @click.stop="selectAllDeviceInputs(device)"
@@ -169,9 +165,9 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
                         <div class="processlist" data-col="H" :style="{width:col.H+'px'}"></div>
 
-                        <div class="buttons pull-right">
-                            <div class="device-schedule text-center hidden" data-col="F" :style="{width:col.F+'px'}">
-                                <i class="icon-time"></i>
+                        <div class="buttons float-end">
+                            <div class="device-schedule text-center d-none" data-col="F" :style="{width:col.F+'px'}">
+                                <i class="bi bi-clock-fill"></i>
                             </div>
                             <div
                                 class="device-last-updated text-center"
@@ -188,7 +184,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
                                 :class="{'text-muted': !device_module}"
                                 data-col-width="50"
                                 title="<?php echo tr('Show device key'); ?>">
-                                <i class="icon-lock"></i>
+                                <i class="bi bi-lock-fill"></i>
                             </a>
                             <a
                                 @click.prevent.stop="device_configure(device)"
@@ -198,7 +194,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
                                 :style="{width:col.C+'px'}"
                                 :class="{'text-muted': !device_module}"
                                 title="<?php echo tr('Configure device using device template'); ?>">
-                                <i class="icon-cog"></i>
+                                <i class="bi bi-gear-fill"></i>
                             </a>
                         </div>
                     </div>
@@ -233,8 +229,8 @@ defined('EMONCMS_EXEC') or die('Restricted access');
                                 <div class="label-container line-height-normal" v-html="input.processlistHtml"></div>
                             </div>
 
-                            <div class="buttons pull-right">
-                                <div class="schedule text-center hidden" data-col="F" :style="{width:col.F+'px'}"></div>
+                            <div class="buttons float-end">
+                                <div class="schedule text-center d-none" data-col="F" :style="{width:col.F+'px'}"></div>
 
                                 <span
                                     @click.stop
@@ -260,7 +256,7 @@ defined('EMONCMS_EXEC') or die('Restricted access');
                                     :id="input.id"
                                     title="<?php echo tr('Configure Input processing') ?>"
                                     href="#">
-                                    <i class="icon-wrench"></i>
+                                    <i class="bi bi-gear"></i>
                                 </a>
                             </div>
                         </div>
@@ -268,47 +264,43 @@ defined('EMONCMS_EXEC') or die('Restricted access');
                 </div>
             </template>
 
-            <!-- No devices / inputs card -->
             <div class="card p-4 my-4 shadow-sm" v-else>
                 <h4 class="mb-3 text-danger fw-bold"><?php echo tr('No inputs created'); ?></h4>
                 <p class="mb-4">
                     <?php echo tr('Inputs are the main entry point for your monitoring device. Configure your device to post values here, you may want to follow the <a href="api">Input API helper</a> as a guide for generating your request.'); ?>
                 </p>
                 <button @click.prevent="create_device" class="btn btn-primary">
-                    <i class="icon-plus-sign"></i> <?php echo tr('New device'); ?>
+                    <i class="bi bi-plus-circle-fill"></i> <?php echo tr('New device'); ?>
                 </button>
             </div>
         </template>
 
         <h4 v-else><?php echo tr('Loading') ?></h4>
 
-        <!-- disable input creation button, only show if input creation is not already disabled and there are existing inputs -->
         <div v-if="!input_creation_disabled && total_inputs > 0">
             <button
                 @click="disableInputCreation"
                 class="btn btn-outline-secondary btn-sm float-end mt-2">
-                <i class="icon icon-lock" style="margin-top:2px"></i>
+                <i class="bi bi-lock-fill" style="margin-top:2px"></i>
                 <?php echo tr('Disable further input creation'); ?>
             </button>
         </div>
     </div>
 
-    <div id="input-none" class="alert alert-block hide">
+    <div id="input-none" class="alert d-none">
         <h4 class="alert-heading"><?php echo tr('No inputs created'); ?></h4>
         <p><?php echo tr('Inputs are the main entry point for your monitoring device. Configure your device to post values here, you may want to follow the <a href="api">Input API helper</a> as a guide for generating your request.'); ?></p>
     </div>
 
-    <div id="input-footer" class="hide">
+    <div id="input-footer" class="d-none">
         <button id="device-new" class="btn btn-primary btn-sm">
-            &nbsp;<i class="icon-plus-sign"></i>&nbsp;<?php echo tr('New device'); ?>
+            &nbsp;<i class="bi bi-plus-circle-fill"></i>&nbsp;<?php echo tr('New device'); ?>
         </button>
     </div>
 
     <div id="input-loader" class="ajax-loader"></div>
 </div>
-
-<!-- Load after the main content -->
-<?php if ($device_module) require "Modules/device/Views/device_dialog.php"; ?>
+</div> <?php if ($device_module) require "Modules/device/Views/device_dialog.php"; ?>
 <?php
 // delete and edit modals
 require "Modules/input/Views/input_dialog.php";

@@ -13,10 +13,9 @@
         $public_username_str = $session['public_username']."/";
     }
 ?>
-
-<!-- Bootstrap 5 (scoped to this view) -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
 <script src="<?php echo $path; ?>Lib/vue.min.js"></script>
 
@@ -78,7 +77,6 @@ function translate(property) {
 }
 </script>
 
-
 <script type="text/javascript" src="<?php echo $path; ?>Modules/feed/feed.js?v=8"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Lib/responsive-linked-tables.js?v=<?php echo $v; ?>"></script>
 
@@ -89,6 +87,7 @@ function translate(property) {
 <link rel="stylesheet" href="<?php echo $path; ?>Lib/misc/autocomplete.css?v=<?php echo $v; ?>">
 
 <style>
+/* Keeping original styles */
 body{padding:0!important}
 
 #table {
@@ -144,10 +143,11 @@ body{padding:0!important}
 
 </style>
 
+<div class="bs5">
 <div id="feed-header" class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h3 id="feeds-title" class="mb-0"><?php echo tr('Feeds'); ?></h3>
-        <h3 id="public-feeds-title" class="hide mb-0"><?php echo tr('Public Feeds'); ?></h3>
+        <h3 id="public-feeds-title" class="d-none mb-0"><?php echo tr('Public Feeds'); ?></h3>
     </div>
     <span id="api-help" class="ms-3">
         <a href="<?php echo $path.$public_username_str; ?>feed/api" class="link-primary"><?php echo tr('Feed API Help'); ?></a>
@@ -168,38 +168,38 @@ body{padding:0!important}
         class="btn btn-outline-secondary btn-sm"
         title="<?php echo tr('Collapse') ?>"
         data-alt-title="<?php echo tr('Expand') ?>">
-        <i class="icon icon-resize-small"></i>
+        <i class="bi bi-arrows-collapse"></i>
     </button>
     <button
         id="select-all"
         class="btn btn-outline-primary btn-sm"
         title="<?php echo tr('Select all') ?>"
         data-alt-title="<?php echo tr('Unselect all') ?>">
-        <i class="icon icon-check"></i>
+        <i class="bi bi-check2-square"></i>
     </button>
-    <button class="btn btn-warning btn-sm feed-edit hide" title="<?php echo tr('Edit'); ?>">
-        <i class="icon-pencil"></i>
+    <button class="btn btn-warning btn-sm feed-edit d-none" title="<?php echo tr('Edit'); ?>">
+        <i class="bi bi-pencil"></i>
     </button>
-    <button class="btn btn-danger btn-sm feed-delete hide" title="<?php echo tr('Delete'); ?>">
-        <i class="icon-trash"></i>
+    <button class="btn btn-danger btn-sm feed-delete d-none" title="<?php echo tr('Delete'); ?>">
+        <i class="bi bi-trash"></i>
     </button>
-    <button class="btn btn-info btn-sm feed-downsample hide" title="<?php echo tr('Downsample'); ?>">
-        <i class="icon-repeat"></i>
+    <button class="btn btn-info btn-sm feed-downsample d-none" title="<?php echo tr('Downsample'); ?>">
+        <i class="bi bi-arrow-repeat"></i>
     </button>
-    <button class="btn btn-success btn-sm feed-download hide" title="<?php echo tr('Download'); ?>">
-        <i class="icon-download"></i>
+    <button class="btn btn-success btn-sm feed-download d-none" title="<?php echo tr('Download'); ?>">
+        <i class="bi bi-download"></i>
     </button>
-    <button class="btn btn-secondary btn-sm feed-graph hide" title="<?php echo tr('Graph view'); ?>">
-        <i class="icon-eye-open"></i>
+    <button class="btn btn-secondary btn-sm feed-graph d-none" title="<?php echo tr('Graph view'); ?>">
+        <i class="bi bi-graph-up"></i>
     </button>
-    <button class="btn btn-outline-dark btn-sm feed-process hide" title="<?php echo tr('Process config'); ?>">
-        <i class="icon-wrench"></i>
+    <button class="btn btn-outline-dark btn-sm feed-process d-none" title="<?php echo tr('Process config'); ?>">
+        <i class="bi bi-gear"></i>
     </button>
 </div>
 
 <div id="table" class="feed-list"></div>
 
-<div id="feed-none" class="alert alert-warning alert-block hide mt-3">
+<div id="feed-none" class="alert alert-warning d-none mt-3">
     <h4 class="alert-heading mb-2"><?php echo tr('No feeds created'); ?></h4>
     <p class="mb-0">
         <?php echo tr('Feeds are where your monitoring data is stored. The route for creating storage feeds is to start by creating inputs (see the inputs tab). Once you have inputs you can either log them straight to feeds or if you want you can add various levels of input processing to your inputs to create things like daily average data or to calibrate inputs before storage. Alternatively you can create Virtual feeds, this is a special feed that allows you to do post processing on existing storage feeds data, the main advantage is that it will not use additional storage space and you may modify post processing list that gets applyed on old stored data. You may want the next link as a guide for generating your request: '); ?>
@@ -207,178 +207,188 @@ body{padding:0!important}
     </p>
 </div>
 
-<div id="public-feeds-none" class="alert alert-info alert-block hide mt-3">
+<div id="public-feeds-none" class="alert alert-info d-none mt-3">
     <h4 class="alert-heading mb-0"><?php echo tr('No public feeds available'); ?></h4>
 </div>
 
 <div id="feed-footer" class="mt-3 d-flex flex-wrap gap-2">
-    <button id="refreshfeedsize" class="btn btn-outline-secondary btn-sm btn-small">
-        <i class="icon-refresh"></i>&nbsp;<?php echo tr('Refresh feed size'); ?>
+    <button id="refreshfeedsize" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-clockwise"></i>&nbsp;<?php echo tr('Refresh feed size'); ?>
     </button>
-    <button id="addnewfeed" class="btn btn-primary btn-sm btn-small" data-toggle="modal" data-target="#newFeedNameModal">
-        <i class="icon-plus-sign"></i>&nbsp;<?php echo tr('New feed'); ?>
+    <button id="addnewfeed" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newFeedNameModal">
+        <i class="bi bi-plus-circle-fill"></i>&nbsp;<?php echo tr('New feed'); ?>
     </button>
-    <button id="importdata" class="btn btn-outline-primary btn-sm btn-small" data-toggle="modal" data-target="#importDataModal">
-        <i class="icon-arrow-up"></i>&nbsp;<?php echo tr('Import data'); ?>
+    <button id="importdata" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importDataModal">
+        <i class="bi bi-cloud-arrow-up"></i>&nbsp;<?php echo tr('Import data'); ?>
     </button>
 </div>
 <div id="feed-loader" class="ajax-loader"></div>
 
 
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
-<!-- FEED EDIT MODAL                                                                                                                               -->
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
-<div id="feedEditModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="feedEditModalLabel" aria-hidden="true" data-backdrop="static">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="feedEditModalLabel"><?php echo tr('Edit feed'); ?></h3>
-    </div>
-    <div class="modal-body">
+<div id="feedEditModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feedEditModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="feedEditModalLabel"><?php echo tr('Edit feed'); ?></h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex flex-column gap-3">
 
-        <div class="input-prepend input-append" id="edit-feed-name-div">
-          <span class="add-on" style="width:100px"><?php echo tr('Name'); ?></span>
-          <input id="feed-name" type="text" style="width:250px">
-          <button class="btn btn-primary feed-edit-save" field="name">Save</button>
-        </div>
-    
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:100px"><?php echo tr('Node'); ?></span>
-          <div class="autocomplete">
-              <input id="feed-node" type="text" style="width:250px">
-          </div>
-          <button class="btn btn-primary feed-edit-save" field="node">Save</button>
-        </div>
+                <div class="input-group" id="edit-feed-name-div">
+                  <span class="input-group-text" style="width:100px"><?php echo tr('Name'); ?></span>
+                  <input id="feed-name" type="text" class="form-control" style="width:250px">
+                  <button class="btn btn-primary feed-edit-save" field="name">Save</button>
+                </div>
+            
+                <div class="input-group">
+                  <span class="input-group-text" style="width:100px"><?php echo tr('Node'); ?></span>
+                  <div class="autocomplete">
+                      <input id="feed-node" type="text" class="form-control" style="width:250px">
+                  </div>
+                  <button class="btn btn-primary feed-edit-save" field="node">Save</button>
+                </div>
 
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:100px"><?php echo tr('Make public'); ?></span>
-          <span class="add-on" style="width:255px"><input id="feed-public" type="checkbox"></span>
-          <button class="btn btn-primary feed-edit-save" field="public">Save</button>
-        </div>
+                <div class="input-group">
+                  <span class="input-group-text" style="width:100px"><?php echo tr('Make public'); ?></span>
+                  <div class="form-check form-switch input-group-text" style="width:255px">
+                      <input class="form-check-input" type="checkbox" role="switch" id="feed-public">
+                  </div>
+                  <button class="btn btn-primary feed-edit-save" field="public">Save</button>
+                </div>
 
-        <div class="input-prepend input-append" id="edit-feed-name-div">
-          <span class="add-on" style="width:100px"><?php echo tr('Unit'); ?></span>
-          <select id="feed_unit_dropdown" style="width:auto">
-              <option value=""></option>
-              <?php
-              // add available units from units.php
-              include('Lib/units.php');
-              if (defined('UNITS')) {
-                  foreach(UNITS as $unit){
-                      printf('<option value="%s">%s (%1$s)</option>',$unit['short'],$unit['long']);
-                  }
-              }
-              ?>
-              <option value="_other"><?php echo tr('Other'); ?></option>
-          </select>
-          <input type="text" id="feed_unit_dropdown_other" style="width:100px"/>       
-          <button class="btn btn-primary feed-edit-save" field="unit">Save</button>
+                <div class="input-group" id="edit-feed-unit-div">
+                  <span class="input-group-text" style="width:100px"><?php echo tr('Unit'); ?></span>
+                  <select id="feed_unit_dropdown" class="form-select" style="width:auto">
+                      <option value=""></option>
+                      <?php
+                      // add available units from units.php
+                      include('Lib/units.php');
+                      if (defined('UNITS')) {
+                          foreach(UNITS as $unit){
+                              printf('<option value="%s">%s (%1$s)</option>',$unit['short'],$unit['long']);
+                          }
+                      }
+                      ?>
+                      <option value="_other"><?php echo tr('Other'); ?></option>
+                  </select>
+                  <input type="text" id="feed_unit_dropdown_other" class="form-control" style="width:100px"/>      
+                  <button class="btn btn-primary feed-edit-save" field="unit">Save</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="feed-edit-save-message" style="position:absolute"></div>
+                <button class="btn btn-secondary" data-bs-dismiss="modal" aria-hidden="true"><?php echo tr('Close'); ?></button>
+            </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <div id="feed-edit-save-message" style="position:absolute"></div>
-        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo tr('Close'); ?></button>
     </div>
 </div>
 
 <?php require "Modules/feed/Views/exporter.php"; ?>
 
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
-<!-- FEED DELETE MODAL                                                                                                                             -->
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
-<div id="feedDeleteModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="feedDeleteModalLabel" aria-hidden="true" data-backdrop="static">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="feedDeleteModalLabel"><?php echo tr('Delete feed'); ?> 
-        <span id="feedDelete-message" class="label label-warning" data-default="<?php echo tr('Deleting a feed is permanent.'); ?>"><?php echo tr('Deleting a feed is permanent.'); ?></span>
-        </h3>
-    </div>
-    <div class="modal-body">
-        <div class="clearfix d-flex row">
-            <div id="clearContainer" class="span6">
-                <div style="min-height:12.1em; position:relative" class="well well-small">
-                    <h4 class="text-info"><?php echo tr('Clear') ?>:</h4>
-                    <p><?php echo tr('Empty feed of all data') ?></p>
-                    <button id="feedClear-confirm" class="btn btn-inverse" style="position:absolute;bottom:.8em"><?php echo tr('Clear Data'); ?>&hellip;</button>
-                </div>
+<div id="feedDeleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feedDeleteModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="feedDeleteModalLabel"><?php echo tr('Delete feed'); ?> 
+                <span id="feedDelete-message" class="badge bg-warning" data-default="<?php echo tr('Deleting a feed is permanent.'); ?>"><?php echo tr('Deleting a feed is permanent.'); ?></span>
+                </h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-            <div id="trimContainer" class="span6">
-                <div class="well well-small">
-                    <h4 class="text-info"><?php echo tr('Trim') ?>:</h4>
-                    <p><?php echo tr('Empty feed data up to') ?>:</p>
-                    <div id="trim_start_time_container" class="control-group" style="margin-bottom:1.3em">
-                        <div class="controls">
-                            <div id="feed_trim_datetimepicker" class="input-append date" style="margin-bottom:0">
-                                <input id="trim_start_time" class="input-medium" data-format="dd/MM/yyyy hh:mm:ss" type="text" placeholder="dd/mm/yyyy hh:mm:ss">
-                                <span class="add-on"> <i data-time-icon="icon-time" data-date-icon="icon-calendar" class="icon-calendar"></i></span>
-                            </div>
-                            <div class="btn-group" style="margin-bottom:-4px">
-                                <button class="btn btn-mini active" title="<?php echo tr('Set to the start date') ?>" data-relative_time="start"><?php echo tr('Start') ?></button>
-                                <button class="btn btn-mini" title="<?php echo tr('One year ago') ?>" data-relative_time="-1y"><?php echo tr('- 1 year') ?></button>
-                                <button class="btn btn-mini" title="<?php echo tr('Two years ago') ?>" data-relative_time="-2y"><?php echo tr('- 2 year') ?></button>
-                                <button class="btn btn-mini" title="<?php echo tr('Set to the current date/time') ?>" data-relative_time="now"><?php echo tr('Now') ?></button>
-                            </div>
+            <div class="modal-body">
+                <div class="row"> 
+                    <div id="clearContainer" class="col-md-6 mb-3">
+                        <div style="min-height:12.1em; position:relative" class="card shadow-sm p-3">
+                            <h4 class="text-primary"><?php echo tr('Clear') ?>:</h4>
+                            <p><?php echo tr('Empty feed of all data') ?></p>
+                            <button id="feedClear-confirm" class="btn btn-dark" style="position:absolute;bottom:.8em"><?php echo tr('Clear Data'); ?>&hellip;</button>
                         </div>
                     </div>
-                    <button id="feedTrim-confirm" class="btn btn-inverse"><?php echo tr('Trim Data'); ?>&hellip;</button>
+
+                    <div id="trimContainer" class="col-md-6 mb-3">
+                        <div class="card shadow-sm p-3">
+                            <h4 class="text-primary"><?php echo tr('Trim') ?>:</h4>
+                            <p><?php echo tr('Empty feed data up to') ?>:</p>
+                            <div id="trim_start_time_container" class="mb-3" style="margin-bottom:1.3em">
+                                <div class="d-flex flex-column"> 
+                                    <div id="feed_trim_datetimepicker" class="input-group date" style="margin-bottom:0">
+                                        <input id="trim_start_time" class="form-control" data-format="dd/MM/yyyy hh:mm:ss" type="text" placeholder="dd/mm/yyyy hh:mm:ss">
+                                        <span class="input-group-text"> <i data-time-icon="bi-clock" data-date-icon="bi-calendar" class="bi bi-calendar"></i></span>
+                                    </div>
+                                    <div class="btn-group mt-2" role="group" style="margin-bottom:-4px">
+                                        <button class="btn btn-sm btn-outline-secondary active" title="<?php echo tr('Set to the start date') ?>" data-relative_time="start"><?php echo tr('Start') ?></button>
+                                        <button class="btn btn-sm btn-outline-secondary" title="<?php echo tr('One year ago') ?>" data-relative_time="-1y"><?php echo tr('- 1 year') ?></button>
+                                        <button class="btn btn-sm btn-outline-secondary" title="<?php echo tr('Two years ago') ?>" data-relative_time="-2y"><?php echo tr('- 2 year') ?></button>
+                                        <button class="btn btn-sm btn-outline-secondary" title="<?php echo tr('Set to the current date/time') ?>" data-relative_time="now"><?php echo tr('Now') ?></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="feedTrim-confirm" class="btn btn-dark"><?php echo tr('Trim Data'); ?>&hellip;</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm p-3 mt-3" style="margin-bottom:0">
+                    <h4 class="text-primary"><?php echo tr('Delete')?>: <span id="feedProcessList"></span></h4>
+                    <p id="deleteFeedText"><?php echo tr('If you have Input Processlist processors that use this feed, after deleting it, review that process lists or they will be in error, freezing other Inputs. Also make sure no Dashboards use the deleted feed.'); ?></p>
+                    <p id="deleteVirtualFeedText"><?php echo tr('This is a Virtual Feed, after deleting it, make sure no Dashboard continue to use the deleted feed.'); ?></p>
+                    <button id="feedDelete-confirm" class="btn btn-danger"><?php echo tr('Delete feed permanently'); ?></button>
                 </div>
             </div>
+            <div class="modal-footer">
+                <div id="feeds-to-delete" class="float-start"></div>
+                <div id="feedDelete-loader" class="ajax-loader" style="display:none;"></div>
+                <button class="btn btn-secondary" data-bs-dismiss="modal" aria-hidden="true"><?php echo tr('Close'); ?></button>
+            </div>
         </div>
-        
-        <div class="well well-small" style="margin-bottom:0">
-            <h4 class="text-info"><?php echo tr('Delete')?>: <span id="feedProcessList"></span></h4>
-            <p id="deleteFeedText"><?php echo tr('If you have Input Processlist processors that use this feed, after deleting it, review that process lists or they will be in error, freezing other Inputs. Also make sure no Dashboards use the deleted feed.'); ?></p>
-            <p id="deleteVirtualFeedText"><?php echo tr('This is a Virtual Feed, after deleting it, make sure no Dashboard continue to use the deleted feed.'); ?></p>
-            <button id="feedDelete-confirm" class="btn btn-danger"><?php echo tr('Delete feed permanently'); ?></button>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <div id="feeds-to-delete" class="pull-left"></div>
-        <div id="feedDelete-loader" class="ajax-loader" style="display:none;"></div>
-        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo tr('Close'); ?></button>
     </div>
 </div>
 
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
-<!-- NEW VIRTUAL FEED                                                                                                                              -->
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
-<div id="newFeedNameModal" class="modal hide keyboard" tabindex="-1" role="dialog" aria-labelledby="newFeedNameModalLabel" aria-hidden="true" data-backdrop="static">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="newFeedNameModalLabel"><?php echo tr('New Feed'); ?></h3>
-    </div>
-    <div class="modal-body">
-        <label><?php echo tr('Feed Name: '); ?></label>
-        <input type="text" value="New Feed" id="newfeed-name">
-        <label><?php echo tr('Feed Tag: '); ?></label>
-        <input type="text" value="" id="newfeed-tag">
-        <label><?php echo tr('Feed Engine: '); ?></label>
-        <select id="newfeed-engine" style="width:350px">
-            <option value="7" selected>VIRTUAL Feed</option>
-            <?php foreach (Engine::get_all_descriptive() as $engine) { ?>
-            <option value="<?php echo $engine["id"]; ?>"><?php echo $engine["description"]; ?></option>
-            <?php } ?>
-        </select>      
-        <select id="newfeed-interval" class="input-mini hide">
-            <?php foreach (Engine::available_intervals() as $i) { ?>
-            <option value="<?php echo $i["interval"]; ?>"><?php echo $i["description"]; ?></option>
-            <?php } ?>
-        </select>
-    </div>
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo tr('Cancel'); ?></button>
-        <button id="newfeed-save" class="btn btn-primary"><?php echo tr('Save'); ?></button>
+<div id="newFeedNameModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newFeedNameModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="newFeedNameModalLabel"><?php echo tr('New Feed'); ?></h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex flex-column gap-2">
+                <label class="form-label"><?php echo tr('Feed Name: '); ?></label>
+                <input type="text" value="New Feed" id="newfeed-name" class="form-control">
+                
+                <label class="form-label"><?php echo tr('Feed Tag: '); ?></label>
+                <input type="text" value="" id="newfeed-tag" class="form-control">
+                
+                <label class="form-label"><?php echo tr('Feed Engine: '); ?></label>
+                <select id="newfeed-engine" class="form-select" style="width:100%">
+                    <option value="7" selected>VIRTUAL Feed</option>
+                    <?php foreach (Engine::get_all_descriptive() as $engine) { ?>
+                    <option value="<?php echo $engine["id"]; ?>"><?php echo $engine["description"]; ?></option>
+                    <?php } ?>
+                </select>      
+                <select id="newfeed-interval" class="form-select form-select-sm d-none">
+                    <?php foreach (Engine::available_intervals() as $i) { ?>
+                    <option value="<?php echo $i["interval"]; ?>"><?php echo $i["description"]; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" aria-hidden="true"><?php echo tr('Cancel'); ?></button>
+                <button id="newfeed-save" class="btn btn-primary"><?php echo tr('Save'); ?></button>
+            </div>
+        </div>
     </div>
 </div>
 
 <?php require "Modules/feed/Views/importer.php"; ?>
 <?php require "Modules/feed/Views/downsample.php"; ?>
 <?php require "Modules/process/Views/process_ui.php"; ?>
-<!------------------------------------------------------------------------------------------------------------------------------------------------- -->
+</div>
+
+
 <script>
 if (public_userid) {
    $("#feeds-title").hide();
-   $("#public-feeds-title").show();
+   // FIX: Updated show() function for B5 class d-none
+   $("#public-feeds-title").removeClass('d-none').show();
 }
 if (!session_write) {
    $("#feed-footer").hide();
@@ -422,14 +432,18 @@ function update_feed_list() {
         if (data.length == 0){
             //$("#feed-header").hide();
             if (public_userid) {
-                $("#public-feeds-none").show();
+                // FIX: Used B5 class d-none, removed B2 class hide
+                $("#public-feeds-none").removeClass('d-none').show(); 
             } else {
-                $("#feed-none").show();
+                 // FIX: Used B5 class d-none, removed B2 class hide
+                $("#feed-none").removeClass('d-none').show(); 
             }
         } else {
             //$("#feed-header").show();
-            $("#feed-none").hide();
-            $("#public-feeds-none").hide();
+             // FIX: Used B5 class d-none, removed B2 class hide
+            $("#feed-none").addClass('d-none').hide(); 
+             // FIX: Used B5 class d-none, removed B2 class hide
+            $("#public-feeds-none").addClass('d-none').hide(); 
         }
         feeds = {};
         filterText = filter.value.toLowerCase()
@@ -457,8 +471,6 @@ function update_feed_list() {
         firstLoad = false;
         var out = "";
         
-
-
         // display nodes and feeds
         var counter = 0;
         for (var node in nodes) {
@@ -482,10 +494,10 @@ function update_feed_list() {
                 node_size += Number(feed.size);
 
                 var title_lines = [feed.name,
-                                  '-----------------------',
-                                  tr('Tag') + ': ' + feed.tag,
-                                  tr('Feed ID') + ': ' + feedid,
-                                  tr('Feed Engine') + ': ' + feed_engines[feed.engine]]
+                                     '-----------------------',
+                                     tr('Tag') + ': ' + feed.tag,
+                                     tr('Feed ID') + ': ' + feedid,
+                                     tr('Feed Engine') + ': ' + feed_engines[feed.engine]]
                 
                 if(feed.engine == 5) {
                     title_lines.push(tr('Feed Interval')+": "+(feed.interval||'')+'s')
@@ -518,13 +530,14 @@ function update_feed_list() {
                     node_fv = fv;
                 }
 
-                feed_section += "<div class='node-feed feed-graph-link' style=\"--status-color: "+ fv.color + "\" feedid="+feedid+" title='"+row_title+"' data-toggle='tooltip'>";
+                feed_section += "<div class='node-feed feed-graph-link' style=\"--status-color: "+ fv.color + "\" feedid="+feedid+" title='"+row_title+"' data-bs-toggle='tooltip'>";
                 var checked = ""; if (selected_feeds[feedid]) checked = "checked";
                 feed_section += "<div class='select text-center' data-col='B'><input class='feed-select' type='checkbox' feedid='"+feedid+"' "+checked+"></div>";
                 feed_section += "<div class='name' data-col='A'>"+feed.name+"</div>";
                 
-                var publicfeed = "<i class='icon-lock'></i>";
-                if (feed['public']==1) publicfeed = "<i class='icon-globe'></i>";
+                // FIX: Replaced icon-lock/icon-globe with bi-lock-fill/bi-globe2
+                var publicfeed = "<i class='bi bi-lock-fill'></i>";
+                if (feed['public']==1) publicfeed = "<i class='bi bi-globe2'></i>";
                 
                 feed_section += '<div class="public text-center" data-col="E">'+publicfeed+'</div>';
                 
@@ -535,16 +548,17 @@ function update_feed_list() {
                 
                 let engine_name = feed_engines[feed.engine];
                 if (engine_name=="PHPFINA") engine_name = "FIXED";
-                else if (engine_name=="PHPTIMESERIES") engine_name = "VARIABLE";  
+                else if (engine_name=="PHPTIMESERIES") engine_name = "VARIABLE"; 
                 
-                feed_section += '  <div class="engine" data-col="G">'+engine_name+intervalstr+'</div>';
-                feed_section += '  <div class="size text-center" data-col="H">'+list_format_size(feed.size)+'</div>';
-                feed_section += '  <div class="processlist" data-col="F">'+processListHTML+'</div>';
-                feed_section += '  <div class="node-feed-right pull-right">';
+                feed_section += '  <div class="engine" data-col="G">'+engine_name+intervalstr+'</div>';
+                feed_section += '  <div class="size text-center" data-col="H">'+list_format_size(feed.size)+'</div>';
+                feed_section += '  <div class="processlist" data-col="F">'+processListHTML+'</div>';
+                // FIX: Replaced pull-right with float-end
+                feed_section += '  <div class="node-feed-right float-end">';
                 if (feed.unit==undefined) feed.unit = "";
-                feed_section += '    <div class="value text-center" data-col="C">'+list_format_value(feed.value)+' '+feed.unit+'</div>';
-                feed_section += '    <div class="time text-center" data-col="D">'+list_format_updated(feed.time,feed.interval)+'</div>';
-                feed_section += '  </div>';
+                feed_section += '    <div class="value text-center" data-col="C">'+list_format_value(feed.value)+' '+feed.unit+'</div>';
+                feed_section += '    <div class="time text-center" data-col="D">'+list_format_updated(feed.time,feed.interval)+'</div>';
+                feed_section += '  </div>';
                 feed_section += '</div>';
 
             }
@@ -558,18 +572,21 @@ function update_feed_list() {
 
             let node_row = "";
             node_row += '<div class="node accordion" style="--status-color: '+ node_fv.color + '">';
-            node_row += '    <div class="node-info accordion-toggle thead'+(isCollapsed ? ' collapsed' : '')+'" data-toggle="collapse" data-target="#collapse'+counter+'">'
-            node_row += '      <div class="select text-center has-indicator" data-col="B"><span class="icon-chevron-'+(isCollapsed ? 'right' : 'down')+' icon-indicator"></span></div>';
-            node_row += '      <h5 class="name" data-col="A">'+node+':</h5>';
-            node_row += '      <div class="public" class="text-center" data-col="E"></div>';
-            node_row += '      <div class="engine" data-col="G"></div>';
-            node_row += '      <div class="size text-center" data-col="H">'+list_format_size(node_size)+'</div>';
-            node_row += '      <div class="processlist" data-col="F"></div>';
-            node_row += '      <div class="node-feed-right pull-right">';
-            node_row += '        <div class="value text-center" data-col="C"></div>';
-            node_row += '        <div class="time text-center" data-col="D"><span class="last-update" style="color:' + node_fv.color + ';">' + node_fv.value + '</span></div>';
-            node_row += '      </div>';
-            node_row += '    </div>';
+            // FIX: Replaced data-toggle="collapse" with data-bs-toggle="collapse"
+            node_row += '    <div class="node-info accordion-toggle thead'+(isCollapsed ? ' collapsed' : '')+'" data-bs-toggle="collapse" data-bs-target="#collapse'+counter+'">'
+            // FIX: Replaced icon-chevron-right/down with bi-chevron-right/down
+            node_row += '      <div class="select text-center has-indicator" data-col="B"><span class="bi bi-chevron-'+(isCollapsed ? 'right' : 'down')+' icon-indicator"></span></div>';
+            node_row += '      <h5 class="name" data-col="A">'+node+':</h5>';
+            node_row += '      <div class="public" class="text-center" data-col="E"></div>';
+            node_row += '      <div class="engine" data-col="G"></div>';
+            node_row += '      <div class="size text-center" data-col="H">'+list_format_size(node_size)+'</div>';
+            node_row += '      <div class="processlist" data-col="F"></div>';
+            // FIX: Replaced pull-right with float-end
+            node_row += '      <div class="node-feed-right float-end">';
+            node_row += '        <div class="value text-center" data-col="C"></div>';
+            node_row += '        <div class="time text-center" data-col="D"><span class="last-update" style="color:' + node_fv.color + ';">' + node_fv.value + '</span></div>';
+            node_row += '      </div>';
+            node_row += '    </div>';
 
             out += node_row + feed_section + "</div>";
         }
@@ -579,8 +596,9 @@ function update_feed_list() {
         // reset the toggle state for all collapsable elements once data has loaded
         // css class "in" is used to remember the expanded state of the ".collapse" element
         if(typeof $.fn.collapse == 'function') {
-            $("#table .collapse").collapse({toggle: false});
-            setExpandButtonState($container.find('.collapsed').length == 0);
+             // FIX: Modal calls are updated to use B5 equivalents if applicable, keep toggle false for list view behavior
+             $("#table .collapse").collapse({toggle: false}); 
+             setExpandButtonState($container.find('.collapsed').length == 0);
         }
         
         autowidth($container) // set each column group to the same width
@@ -621,7 +639,7 @@ $(".feed-graph").click(function(){
     var public_username_str = "";
     if (public_userid) public_username_str = public_username+"/";
     
-    window.location = path+public_username_str+feedviewpath+graph_feeds.join(",");      
+    window.location = path+public_username_str+feedviewpath+graph_feeds.join(",");        
 });
 
 function buildFeedNodeList() {
@@ -638,6 +656,7 @@ function buildFeedNodeList() {
 // EDIT FEED
 // ---------------------------------------------------------------------------------------------
 $(".feed-edit").click(function() {
+    // FIX: Updated to use B5 modal call
     $('#feedEditModal').modal('show');
     var edited_feeds = $.map(selected_feeds, function(val,key){ return val ? key: null });
     var feedid = 0;
@@ -646,17 +665,21 @@ $(".feed-edit").click(function() {
         if (selected_feeds[z]){
             feedid = z;
             if (edited_feeds.length == 1) {
-                $("#feed-name").prop('disabled',false).val(feeds[feedid].name);
-                $("#edit-feed-name-div").show();               
+                // FIX: Added form-control class to input
+                $("#feed-name").prop('disabled',false).val(feeds[feedid].name).addClass('form-control');
+                $("#edit-feed-name-div").show();              
             } else {
                 $("#edit-feed-name-div").hide();
             }
-            $("#feed-node").val(feeds[feedid].tag);
+             // FIX: Added form-control class to input
+            $("#feed-node").val(feeds[feedid].tag).addClass('form-control');
             var checked = false; if (feeds[feedid]['public']==1) checked = true;
-            $("#feed-public")[0].checked = checked;
+            // FIX: Checkbox element ID in B5 refactored code is #feed-public
+            $("#feed-public")[0].checked = checked; 
             
             // pre-select item if already set
-            let $dropdown = $('#feed_unit_dropdown');
+            // FIX: Added form-select class to dropdown
+            let $dropdown = $('#feed_unit_dropdown').addClass('form-select');
             $dropdown.val(feeds[feedid].unit);
             // set the dropdown to "other" if value not in list
             let options = [];
@@ -664,7 +687,8 @@ $(".feed-edit").click(function() {
                 options.push(elem.value);
             })
             if (options.indexOf(feeds[feedid].unit) == -1) {
-                $('#feed_unit_dropdown_other').val(feeds[feedid].unit);
+                 // FIX: Added form-control class to input
+                $('#feed_unit_dropdown_other').val(feeds[feedid].unit).addClass('form-control');
                 $dropdown.val('_other');
             }
             // show / hide "other" free text field on load and on change if "other" selected in dropdown
@@ -714,6 +738,7 @@ $(".feed-edit-save").click(function() {
             
             if (edit_field=="public") {
                 var publicfeed = 0;
+                // FIX: Checkbox element ID in B5 refactored code is #feed-public
                 if ($("#feed-public")[0].checked) publicfeed = 1;  
                 fields.public = publicfeed;
             }
@@ -733,6 +758,7 @@ $(".feed-edit-save").click(function() {
             // console.log(Object.keys(data).length);
             // dont send ajax if nothing changed
             if (Object.keys(data).length==0) {
+                 // FIX: Use B5 modal hide
                 $('#feedEditModal').modal('hide');
                 return;
             }
@@ -750,6 +776,7 @@ $(".feed-edit-save").click(function() {
     
     if (!error) {
         update_feed_list();
+         // FIX: Use B5 modal hide
         $('#feedEditModal').modal('hide');
         $('#feed-edit-save-message').text('').hide();
     }
@@ -762,8 +789,7 @@ $(".feed-edit-save").click(function() {
 
 /**
  * getFeedProcess
- * 
- * Scans all input processes and identifies which processes are linked to feeds.
+ * * Scans all input processes and identifies which processes are linked to feeds.
  * Returns an object mapping feed IDs to their associated input, process definition, and feed ID.
  * Used to determine which feeds are referenced by input process lists for safe deletion and management.
  *
@@ -858,7 +884,8 @@ function showSelectedFeeds(feed_inputs) {
     if (total_selected === 1) {
         total_summary += `<h5>${feedListShort}</h5>`;
     } else {
-        total_summary += `<h5 title="${feedListShort}"><?php echo tr('%s Feeds selected') ?> <i class="icon icon-question-sign"></i></h5>`.replace('%s', total_selected);
+        // FIX: Replaced icon-question-sign with bi-question-circle
+        total_summary += `<h5 title="${feedListShort}"><?php echo tr('%s Feeds selected') ?> <i class="bi bi-question-circle"></i></h5>`.replace('%s', total_selected);
     }
 
     // Compose the combined message
@@ -875,7 +902,8 @@ function showSelectedFeeds(feed_inputs) {
             ? ' <?php echo tr("associated with this feed") ?>'
             : ' <?php echo tr("associated with these feeds") ?>';
 
-        feedProcessList = `<span class="badge badge-default" style="padding-left:4px;margin-right:6px"><i class="icon icon-white icon-exclamation-sign"></i> ${msg}</span>`;
+        // FIX: Replaced B2 label/icon with B5 badge/icon
+        feedProcessList = `<span class="badge bg-danger" style="padding-left:4px;margin-right:6px"><i class="bi bi-exclamation-triangle-fill"></i> ${msg}</span>`;
     }
 
     total_summary += '</div>';
@@ -886,8 +914,7 @@ function showSelectedFeeds(feed_inputs) {
 
 /**
  * show the trim start time in the date time picker and input field
- * 
- * will also highlight a button if it matches the currently selected timestamp
+ * * will also highlight a button if it matches the currently selected timestamp
  *
  * @param int start_time unix timestamp (seconds)
  */
@@ -909,10 +936,9 @@ function showFeedStartDate(start_time){
 
 /**
  * Initialises the different events to enable the "relative date" selections below the date/time picker
- * 
- * Set the data property of each button to store correct Date() for each button. Each button must have a 
+ * * Set the data property of each button to store correct Date() for each button. Each button must have a 
  * "data-relative_time" attribute with one of the following values:-
- *   "-2y", "-1y", "start" or "now" (default)
+ * "-2y", "-1y", "start" or "now" (default)
  *
  * Each button shows a formatted date in the input field and also sets the date time picker to the relevant position
  * @param int start_time the earliest possible timestamp for all the selected feeds - does not allow trimming beyond this point
@@ -1014,15 +1040,15 @@ $('#feed_trim_datetimepicker').on('changeDate',function(event){
 function isSelectionValidForTrim(){
     /*
         const MYSQL = 0;
-        const TIMESTORE = 1;     // Depreciated
+        const TIMESTORE = 1;      // Depreciated
         const PHPTIMESERIES = 2;
-        const GRAPHITE = 3;      // Not included in core
-        const PHPTIMESTORE = 4;  // Depreciated
+        const GRAPHITE = 3;       // Not included in core
+        const PHPTIMESTORE = 4;   // Depreciated
         const PHPFINA = 5;
-        const VIRTUALFEED = 7;   // Virtual feed, on demand post processing
-        const MYSQLMEMORY = 8;   // Mysql with MEMORY tables on RAM. All data is lost on shutdown 
-        const REDISBUFFER = 9;   // (internal use only) Redis Read/Write buffer, for low write mode
-        const CASSANDRA = 10;    // Cassandra
+        const VIRTUALFEED = 7;    // Virtual feed, on demand post processing
+        const MYSQLMEMORY = 8;    // Mysql with MEMORY tables on RAM. All data is lost on shutdown 
+        const REDISBUFFER = 9;    // (internal use only) Redis Read/Write buffer, for low write mode
+        const CASSANDRA = 10;     // Cassandra
     */
     let allowed_engines = [0,2,5,8] // array of allowed storage engines
     for (var feedid in selected_feeds) {
@@ -1046,14 +1072,17 @@ function updateFeedDeleteModalMessage(response){
     let message = response.message;
     let success = response.success;
     let $msg = $('#feedDelete-message');
-    let cssClassName = success ? 'label-success' : 'label-important';
+    // FIX: Updated B2 label-success/label-important to B5 bg-success/bg-danger
+    let cssClassName = success ? 'bg-success' : 'bg-danger';
 
     $msg.stop().fadeOut(function(){
-        $(this).text(message).removeClass('label-warning').addClass(cssClassName).fadeIn();
+        // FIX: Removed B2 class label-warning
+        $(this).text(message).removeClass('bg-warning').addClass(cssClassName).fadeIn(); 
     });
     setTimeout(function(){
         $msg.stop().fadeOut(function(){
-            $msg.text($msg.data('default')).removeClass(cssClassName).addClass('label-warning').fadeIn();
+            // FIX: Restored B5 class bg-warning, removed B2 class label-warning
+            $msg.text($msg.data('default')).removeClass(cssClassName).addClass('bg-warning').fadeIn(); 
         })
     }, 3800);
 }
@@ -1096,8 +1125,9 @@ function enableTrim(start_time){
     initRelativeStartDateButtons(start_time);
 
     // remove any styling the disableTrim() function created
+    // FIX: Replaced text-info with text-primary
     $('#trimContainer').attr('title','').removeClass('muted')//.show()
-        .find('h4').addClass('text-info').removeClass('muted').end()
+        .find('h4').addClass('text-primary').removeClass('muted').end()
         .find('button,input').removeClass('disabled')
         .find('input').val('');
     
@@ -1114,12 +1144,14 @@ function enableTrim(start_time){
             let isValidDate = !isNaN(start_date.getTime()) && input_date_string != "";
             // exit if supplied date not valid
             if (!isValidDate) {
-                $('#trim_start_time_container').addClass('error');
+                 // FIX: Used B5 class is-invalid
+                $('#trim_start_time_container').addClass('is-invalid'); 
                 $input.focus();
                 return false;
             }else{
                 if(confirm("<?php echo tr('This is a new feature. Consider backing up your data before you continue. OK to continue?') ?>") == true) {
-                    $('#trim_start_time_container').removeClass('error');
+                 // FIX: Removed B5 class is-invalid
+                    $('#trim_start_time_container').removeClass('is-invalid'); 
                     // set to seconds from milliseconds
                     let start_time = start_date.getTime()/1000;
                     $("#feedDelete-loader").fadeIn();
@@ -1148,7 +1180,8 @@ function enableTrim(start_time){
  */
 function disableTrim(){
     $('#trimContainer').attr('title','<?php echo tr('"Trim" not available for this storage engine') ?>').addClass('muted')//.hide()
-        .find('h4').removeClass('text-info').addClass('muted').end()
+        // FIX: Replaced text-info with text-primary
+        .find('h4').removeClass('text-primary').addClass('muted').end()
         .find('button,input').addClass('disabled')
         .find('input').val('');
     $('#feedTrim-confirm').unbind('click'); // remove previous click event (if it exists)
@@ -1156,13 +1189,13 @@ function disableTrim(){
 
 /**
  * trigger off the modal overlay to display delete options
- * 
- * jQuery Event handler for the delete feed button
+ * * jQuery Event handler for the delete feed button
  * also shows items selected as well as a processlist warning
  */
 $(".feed-delete").click(function(){
     $('#feedDeleteModal #deleteFeedText').show();
     $('#feedDeleteModal #deleteVirtualFeedText').hide();
+     // FIX: Updated to use B5 modal call
     $('#feedDeleteModal').modal('show'); //show the delete modal
 
     // get the list of input processlists that write to feeds
@@ -1185,15 +1218,15 @@ $(".feed-delete").click(function(){
 function isSelectionValidForClear(){
     /*
         const MYSQL = 0;
-        const TIMESTORE = 1;     // Depreciated
+        const TIMESTORE = 1;      // Depreciated
         const PHPTIMESERIES = 2;
-        const GRAPHITE = 3;      // Not included in core
-        const PHPTIMESTORE = 4;  // Depreciated
+        const GRAPHITE = 3;       // Not included in core
+        const PHPTIMESTORE = 4;   // Depreciated
         const PHPFINA = 5;
-        const VIRTUALFEED = 7;   // Virtual feed, on demand post processing
-        const MYSQLMEMORY = 8;   // Mysql with MEMORY tables on RAM. All data is lost on shutdown 
-        const REDISBUFFER = 9;   // (internal use only) Redis Read/Write buffer, for low write mode
-        const CASSANDRA = 10;    // Cassandra
+        const VIRTUALFEED = 7;    // Virtual feed, on demand post processing
+        const MYSQLMEMORY = 8;    // Mysql with MEMORY tables on RAM. All data is lost on shutdown 
+        const REDISBUFFER = 9;    // (internal use only) Redis Read/Write buffer, for low write mode
+        const CASSANDRA = 10;     // Cassandra
     */
     let allowed_engines = [0,2,5,8]; // array of allowed storage engines 
     for (var feedid in selected_feeds) {
@@ -1217,8 +1250,9 @@ function initClear(){
 
 function enableClear(){
     // remove any disable styling
+     // FIX: Replaced text-info with text-primary
     $('#clearContainer').attr('title','').removeClass('muted')//.show()
-        .find('h4').addClass('text-info').removeClass('muted').end()
+        .find('h4').addClass('text-primary').removeClass('muted').end()
         .find('button').removeClass('disabled');
 
     $("#feedClear-confirm")
@@ -1247,8 +1281,9 @@ function enableClear(){
 function disableClear(){
     $("#feedClear-confirm").unbind();
 
+     // FIX: Replaced text-info with text-primary
     $('#clearContainer').attr('title','<?php echo tr('"Clear" not available for this storage engine') ?>').addClass('muted')//.hide()
-        .find('h4').removeClass('text-info').addClass('muted').end()
+        .find('h4').removeClass('text-primary').addClass('muted').end()
         .find('button').addClass('disabled');
 }
 
@@ -1265,6 +1300,7 @@ $("#feedDelete-confirm").click(function(){
         setTimeout(function() {
             update_feed_list();
             updaterStart(update_feed_list, 5000);
+             // FIX: Use B5 modal hide
             $('#feedDeleteModal').modal('hide');
             feed_selection();
         }, 5000);
@@ -1292,32 +1328,38 @@ function feed_selection()
     });
     
     if (num_selected>0) {
-        if (session_write) $(".feed-delete").show();
-        $(".feed-download").show();
-        $(".feed-graph").show();
-        if (session_write) $(".feed-edit").show();
+        // FIX: Replaced show() with removeClass('d-none')
+        if (session_write) $(".feed-delete").removeClass('d-none').show();
+        $(".feed-download").removeClass('d-none').show();
+        $(".feed-graph").removeClass('d-none').show();
+        if (session_write) $(".feed-edit").removeClass('d-none').show();
         $("#filter").hide();
     } else {
-        $(".feed-delete").hide();
-        $(".feed-download").hide();
-        $(".feed-graph").hide();
-        $(".feed-edit").hide();
+        // FIX: Replaced hide() with addClass('d-none')
+        $(".feed-delete").addClass('d-none').hide();
+        $(".feed-download").addClass('d-none').hide();
+        $(".feed-graph").addClass('d-none').hide();
+        $(".feed-edit").addClass('d-none').hide();
         $("#filter").show();
     }
     
     if (phpfina_selected>0 && num_selected == phpfina_selected) {
-        $(".feed-downsample").show();
+         // FIX: Replaced show() with removeClass('d-none')
+        $(".feed-downsample").removeClass('d-none').show();
     } else {
-        $(".feed-downsample").hide();
+         // FIX: Replaced hide() with addClass('d-none')
+        $(".feed-downsample").addClass('d-none').hide();
     }
 
     // There should only ever be one feed that is selected here:
     var feedid = 0; for (var z in selected_feeds) { if (selected_feeds[z]) feedid = z; }
     // Only show feed process button for Virtual feeds
     if (feeds[feedid] && feeds[feedid].engine==7 && num_selected==1) {
-        if (session_write) $(".feed-process").show(); 
+        // FIX: Replaced show() with removeClass('d-none')
+        if (session_write) $(".feed-process").removeClass('d-none').show(); 
     } else {
-        $(".feed-process").hide();
+        // FIX: Replaced hide() with addClass('d-none')
+        $(".feed-process").addClass('d-none').hide();
     }
 }
 
@@ -1356,6 +1398,7 @@ $("#newfeed-save").click(function (){
         return false;
     } else {
         update_feed_list(); 
+         // FIX: Use B5 modal hide
         $('#newFeedNameModal').modal('hide');
     }
 });
@@ -1363,9 +1406,11 @@ $("#newfeed-save").click(function (){
 $('#newfeed-engine').change(function(){
     var engine = $(this).val();
     if (engine==5) {
-        $('#newfeed-interval').show();
+         // FIX: Replaced show() with removeClass('d-none')
+        $('#newfeed-interval').removeClass('d-none').show();
     } else {
-        $('#newfeed-interval').hide();
+         // FIX: Replaced hide() with addClass('d-none')
+        $('#newfeed-interval').addClass('d-none').hide();
     }
 });
 
@@ -1375,7 +1420,7 @@ $(".feed-process").click(function() {
     var contextid = feedid;
     var contextname = "";
     if (feeds[feedid].name != "") contextname = feeds[feedid].tag + " : " + feeds[feedid].name;
-    else contextname = feeds[feedid].tag + " : " + feeds[feedid].id;    
+    else contextname = feeds[feedid].tag + " : " + feeds[feedid].id;     
     process_vue.load(1, contextid, feeds[feedid].processList, contextname, null, null); // load configs
 });
 
