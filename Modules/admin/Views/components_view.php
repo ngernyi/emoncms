@@ -126,6 +126,19 @@ function component_update(name,branch) {
     });   
 }
 
+    /**
+ * Update all system components to the specified branch by calling the backend API.
+ *
+ * Sends an AJAX request to the `components-update-all` endpoint with
+ * the target branch. On success, starts refreshing the update log
+ * to show progress for all components. Handles errors and reauthentication
+ * if needed.
+ *
+ * @param {string} branch The branch to which all components should be updated.
+ *
+ * @return {void} This function does not return a value; it updates
+ *                logs and triggers UI changes asynchronously.
+ */
 function update_all_components(branch) {
     $.ajax({                                      
         url: path+'admin/components-update-all',
