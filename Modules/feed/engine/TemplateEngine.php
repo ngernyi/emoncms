@@ -2,7 +2,10 @@
 
 // engine_methods interface in shared_helper.php
 include_once dirname(__FILE__) . '/shared_helper.php';
-
+/**
+ * TemplateEngine
+ * REENGINEERED: Added Fault Tolerance to data retrieval logic.
+ */
 class TemplateEngine implements engine_methods
 {
     private $log;
@@ -129,109 +132,126 @@ class TemplateEngine implements engine_methods
      * heat pump COP from electric consumption and heat output data. CSV export in multiple columns and stacking of feeds in graphs are also made easier.
      *
      * While there are applications where returning the exact timestamp of the recorded data is important, this is currently outside of the design goals of the emoncms application.
-    */
+     * 
+     * * Get Data Combined
+     * REENGINEERED: Wrapped complex timezone/interval logic in Try-Catch.
+     * This ensures that if a Date calculation fails (e.g., invalid timezone), the system doesn't crash.
+     */
+
     public function get_data_combined($id,$start,$end,$interval,$average=0,$timezone="UTC",$timeformat="unix",$csv=false,$skipmissing=0,$limitinterval=1)
     {
-        $id = (int) $id;
-        $skipmissing = (int) $skipmissing;
-        $limitinterval = (int) $limitinterval;
+        // Start Fault-Tolerant Block
+        try {
+            $id = (int) $id;
+            $skipmissing = (int) $skipmissing;
+            $limitinterval = (int) $limitinterval;
 
-        $start = (int) $start;
-        $end = (int) $end;
+            $start = (int) $start;
+            $end = (int) $end;
 
-        if ($end<=$start) return array('success'=>false, 'message'=>"request end time before start time");
+            if ($end<=$start) return array('success'=>false, 'message'=>"request end time before start time");
 
-        if ($timezone===0) $timezone = "UTC";
+            if ($timezone===0) $timezone = "UTC";
 
-        if ($csv) {
-            require_once "Modules/feed/engine/shared_helper.php";
-            $helperclass = new SharedHelper($settings['feed']);
-            $helperclass->set_time_format($timezone,$timeformat);
-        }
+            if ($csv) {
+                require_once "Modules/feed/engine/shared_helper.php";
+                global $settings; // Ensure settings are available
+                $helperclass = new SharedHelper($settings['feed']);
+                $helperclass->set_time_format($timezone,$timeformat);
+            }
 
-        $notime = false;
-        if ($timeformat === "notime") {
-            $notime = true;
-        }
+            $notime = false;
+            if ($timeformat === "notime") {
+                $notime = true;
+            }
 
         // The first section here deals with the timezone aligned interval codes
         // the start time is modified to align to the nearest day, week, month or year
         // later the while loop is advanced by the value in the $modify string
         // all using php DateTime aligned to user/feed timezone
-        if (in_array($interval,array("weekly","daily","monthly","annual"))) {
-            $fixed_interval = false;
+            if (in_array($interval,array("weekly","daily","monthly","annual"))) {
+                $fixed_interval = false;
             // align to day, month, year
-            $date = new DateTime();
-            $date->setTimezone(new DateTimeZone($timezone));
-            $date->setTimestamp($start);
-            $date->modify("midnight");
-            $modify = "+1 day";
-            if ($interval=="weekly") {
-                $date->modify("this monday");
-                $modify = "+1 week";
-            } elseif ($interval=="monthly") {
-                $date->modify("first day of this month");
-                $modify = "+1 month";
-            } elseif ($interval=="annual") {
-                $date->modify("first day of january this year");
-                $modify = "+1 year";
-            }
+                $date = new DateTime();
+                $date->setTimezone(new DateTimeZone($timezone));
+                $date->setTimestamp($start);
+                $date->modify("midnight");
+                
+                $modify = "+1 day";
+                if ($interval=="weekly") {
+                    $date->modify("this monday");
+                    $modify = "+1 week";
+                } elseif ($interval=="monthly") {
+                    $date->modify("first day of this month");
+                    $modify = "+1 month";
+                } elseif ($interval=="annual") {
+                    $date->modify("first day of january this year");
+                    $modify = "+1 year";
+                }
             // Set time to start
-            $time = $date->getTimestamp();
-        } else {
+                $time = $date->getTimestamp();
+            } else {
             // If interval codes are not specified then we advanced by a fixed numeric interval
-            $fixed_interval = true;
+                $fixed_interval = true;
             // Interval must be integer
-            $interval = (int) $interval;
+                $interval = (int) $interval;
             // Interval should not be less than 1 second
-            if ($interval<1) $interval = 1;
+                if ($interval<1) $interval = 1;
             // May want to limit to data interval here if feed engine has a fixed interval type
             // Set time to start
-            $time = $start;
-        }
+                $time = $start;
+            }
 
-        if ($csv) {
-            $helperclass->csv_header($id);
-        } else {
-            $data = array();
-        }
+            if ($csv) {
+                $helperclass->csv_header($id);
+            } else {
+                $data = array();
+            }
 
-        while($time<=$end)
-        {
+            while($time<=$end)
+            {
             // Start time of interval/division
-            $div_start = $time;
+                $div_start = $time;
 
             // calculate start of next interval
-            if ($fixed_interval) {
-                $div_end = $time + $interval;
-            } else {
-                $date->modify($modify);
-                $div_end = $date->getTimestamp();
-            }
+                if ($fixed_interval) {
+                    $div_end = $time + $interval;
+                } else {
+                    $date->modify($modify);
+                    $div_end = $date->getTimestamp();
+                }
 
             // Read in value here from data file, database, timeseries interface
             // If average = 0, find nearest value that is >= div_start && < div_end
             // If average = 1, find average of values that are >= div_start && < div_end
-            $value = 100;
+                $value = 100;
 
             // Write as csv or array
-            if ($csv) {
-                $helperclass->csv_write($div_start,$value);
-            } else if ($notime) {
-                $data[] = $value;
-            } else {
-                $data[] = array($div_start,$value);
-            }
+                if ($csv) {
+                    $helperclass->csv_write($div_start,$value);
+                } else if ($notime) {
+                    $data[] = $value;
+                } else {
+                    $data[] = array($div_start,$value);
+                }
 
             // Advance position
-            $time = $div_end;
-        }
+                $time = $div_end;
+            }
 
-        if ($csv) {
-            $helperclass->csv_close();
-            exit;
-        } else {
-            return $data;
+            if ($csv) {
+                $helperclass->csv_close();
+                exit;
+            } else {
+                return $data;
+            }
+
+        } catch (Exception $e) {
+            // CATCH: Log the error (e.g., "DateTimeZone::__construct(): Unknown or bad timezone")
+            $this->log->error("TemplateEngine get_data_combined() Failed: " . $e->getMessage());
+            
+            // Return empty array so the graph is just blank, not broken.
+            return array();
         }
     }
 

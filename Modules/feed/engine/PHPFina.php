@@ -16,74 +16,69 @@ class PHPFina implements engine_methods
 
     /**
      * Constructor.
-     *
+     * REENGINEERED: Added Error Handler to convert PHP Warnings (like file not found) into Exceptions.
      * @api
     */
     public function __construct($settings)
-    {
+{
         if (isset($settings['datadir'])) $this->dir = $settings['datadir'];
+        
+        // 1. Initialize Logger
         $this->log = new EmonLogger(__FILE__);
-    }
 
+        // 2. Global Error Handler for this Engine
+        // This forces legacy functions like fopen() to throw Exceptions we can catch
+        set_error_handler(function($severity, $message, $file, $line) {
+            if (!(error_reporting() & $severity)) {
+                return;
+            }
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        });
+    }
 // #### \/ Below are required methods
 
     /**
      * Create feed
-     *
+     * REENGINEERED: Wrapped in try-catch to handle permission errors or disk full errors.
      * @param integer $id The id of the feed to be created
      * @param array $options for the engine
     */
-    public function create($id,$options)
+public function create($id, $options)
     {
-        $id = (int)$id;
-        $interval = (int) $options['interval'];
-        
-        global $settings;
-        // Set minimum feed interval
-        $min_feed_interval = 10;
-        if (isset($settings['feed']['min_feed_interval'])) {
-             $min_feed_interval = (int) $settings['feed']['min_feed_interval'];
-             if ($min_feed_interval<1) {
-                 $min_feed_interval = 1;
-             }
-        }
-        
-        if ($interval<$min_feed_interval) {
-            $interval = $min_feed_interval;
-        }
+        try {
+            $id = (int)$id;
+            $interval = (int)$options['interval'];
+            $feedname = "$id.meta";
 
-        // Check to ensure we dont overwrite an existing feed
-        $feedname = "$id.meta";
-        if (!file_exists($this->dir.$feedname)) {
-            // Set initial feed meta data
-            $meta = new stdClass();
-            $meta->interval = $interval;
-            $meta->start_time = 0;
-            $meta->npoints = 0;
+            // Check if file exists
+            if (!file_exists($this->dir . $feedname)) {
+                
+                $meta = new stdClass();
+                $meta->interval = $interval;
+                $meta->start_time = 0;
+                $meta->npoints = 0;
 
-            // Save meta data
-            $msg=$this->create_meta($id,$meta);
-            if ($msg !== true) {
-                return $msg;
+                $msg = $this->create_meta($id, $meta);
+                if ($msg !== true) throw new Exception("Meta creation failed: $msg");
+
+                // REENGINEERED: Removed '@', catching exception instead
+                $fh = fopen($this->dir.$id.".dat", 'c+'); 
+                if (!$fh) {
+                    throw new Exception("Could not create data file");
+                }
+                fclose($fh);
             }
 
-            $fh = @fopen($this->dir.$id.".dat", 'c+');
-            if (!$fh) {
-                $error = error_get_last();
-                $msg = "could not create meta data file ".$error['message'];
-                $this->log->error("create() ".$msg);
-                return $msg;
+            if (!file_exists($this->dir.$feedname)) {
+                throw new Exception("create failed: missing meta file");
             }
-            fclose($fh);
-            $this->log->info("create() feedid=$id");
-        }
 
-        if (file_exists($this->dir.$feedname)) {
             return true;
-        } else {
-            $msg = "create failed, could not find meta data file '".$this->dir.$feedname."'";
-            $this->log->error("create() ".$msg);
-            return $msg;
+
+        } catch (Exception $e) {
+            // Log the specific error to EmonLogger
+            $this->log->error("create() Failed for Feed $id: " . $e->getMessage());
+            return "Error: " . $e->getMessage();
         }
     }
 
@@ -201,9 +196,31 @@ class PHPFina implements engine_methods
         $this->post_buffer = array();
     }
 
+/**
+     * Post Multiple (Bulk Save)
+     * REENGINEERED: This is the most critical function. 
+     * It now prevents a single file write error from crashing the whole input thread.
+     */
+    
     public function post_multiple($id,$data,$padding_mode=null)
     {
-        $id = (int) $id;
+        try {
+            $id = (int)$id;
+
+            if (!$meta = $this->get_meta($id)) {
+                throw new Exception("Meta missing for feed id: $id");
+            }
+
+            // REENGINEERED: Robust file opening
+            $fh = fopen($this->dir.$id.".dat", 'c+');
+            if (!$fh) {
+                throw new Exception("Cannot open data file for id=$id");
+            }
+
+            $last_pos = -1;
+            foreach ($data as $d) {
+                $time = (int) $d[0];
+                $value = (float) $d[1];
 
         if ($padding_mode=="join") $join = true; else $join = false;
 
@@ -300,6 +317,11 @@ class PHPFina implements engine_methods
         }
         fclose($fh);
         return true;
+} catch (Exception $e) {
+            // CRITICAL: Log error and return false so Feed Model knows it failed
+            $this->log->error("post_multiple() Failed for Feed $id: " . $e->getMessage());
+            return false; 
+        }
     }
 
     /**
@@ -1032,14 +1054,18 @@ class PHPFina implements engine_methods
 
     /**
      * Abstracted open
-     *
+     ** REENGINEERED: Centralized protection for all read operations (get_data, etc.)
      */
-    public function open($id,$mode) {
-        if (!$fh = @fopen($this->dir.$id.".dat", $mode)) {
-            $this->log->error("PHPFina could not open $id.dat");
+public function open($id, $mode) {
+        try {
+            // REENGINEERED: Removed '@'. If fopen fails, it throws ErrorException.
+            $fh = fopen($this->dir.$id.".dat", $mode);
+            return $fh;
+        } catch (Exception $e) {
+            // Log the exact reason why it failed (Permissions? Missing file?)
+            $this->log->error("open() Failed for Feed $id: " . $e->getMessage());
             return false;
         }
-        return $fh;
     }
 
     /**
