@@ -1,4 +1,11 @@
 <?php
+/**
+ * Admin Users Page
+ *
+ * Provides the interface for viewing, searching, ordering, and adding users.
+ * Uses AJAX calls to fetch user data from the server.
+ *
+ */
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path;
 ?>
@@ -136,6 +143,8 @@ global $path;
     // -------------------------------------------------------------------------------------------
 
     var number_of_users = admin.numberofusers();
+    console.log("[DEBUG] Number of users fetched: " + number_of_users);
+    
     var users_per_page = 250;
     var number_of_pages = Math.ceil(number_of_users / users_per_page);
     var orderby = "id";
@@ -151,6 +160,7 @@ global $path;
     $("#numberofusers").html(number_of_users);
 
     users = admin.userlist(page, 250, orderby, order, searchq);
+    console.log("[DEBUG] User list fetched: ", users);
     table_draw();
 
     $(".pagination").on("click", ".pageselect", function() {

@@ -1,4 +1,28 @@
 <?php 
+/**
+ * Admin Update View
+ *
+ * Provides the administrative user interface for managing system,
+ * application, firmware, and database updates.
+ *
+ * Key responsibilities:
+ * - Trigger backend update processes via AJAX
+ * - Display real-time update logs for traceability
+ * - Handle firmware selection and custom firmware uploads
+ *
+ * Access control:
+ * - Restricted to authenticated admin users only
+ *
+ * Related backend endpoints:
+ * - admin/update-start
+ * - admin/update-firmware
+ * - admin/upload-custom-firmware
+ * - admin/update-log
+ *
+ * Notes:
+ * - This view relies heavily on asynchronous operations and log polling
+ * - Logging and documentation are critical for debugging long-running updates
+ */
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $settings; 
 ?>
@@ -11,7 +35,17 @@ global $settings;
 <?php } ?>
 
     <?php
-    // UPDATES
+    /**
+ * Full System Update Section
+ *
+ * Allows administrators to trigger a full system update including:
+ * - Operating system
+ * - Packages
+ * - EmonHub
+ * - Emoncms core
+ *
+ * Firmware updates are explicitly excluded from this action.
+ */
     // -------------------
     ?>
     <section class="d-md-flex justify-content-between align-items-center pb-md-2 border-top pb-md-0 text-right pb-2 px-1">
@@ -27,7 +61,17 @@ global $settings;
     </section>
 
     <?php
-    // EMONCMS UPDATE
+/**
+ * Emoncms Update Section
+ *
+ * Triggers updates for:
+ * - Emoncms core
+ * - Installed Emoncms modules
+ * - Related services
+ *
+ * Does not affect operating system packages or firmware.
+ */
+
     // -------------------
     ?>
     <aside class="d-md-flex justify-content-between align-items-center pb-md-2 border-top pb-md-0 text-right pb-2 border-top px-1">
@@ -40,7 +84,19 @@ global $settings;
     </aside>
 
     <?php
-    // SYSTEM UPDATE
+    /**
+ * Firmware Update Section
+ *
+ * Provides firmware update functionality for connected hardware devices.
+ * Admins can:
+ * - Select serial port
+ * - Choose hardware type and radio format
+ * - Select predefined firmware or upload custom firmware
+ *
+ * This section interacts with hardware and requires careful validation
+ * and logging for traceability.
+ */
+
     // -------------------
     ?>
     <aside class="d-md-flex justify-content-between align-items-center pb-md-2 border-top pb-md-0 text-right pb-2 border-top px-1">
@@ -102,7 +158,16 @@ global $settings;
     </aside>
 
     <?php
-    // DATABASE UPDATE
+    /**
+ * Database Update Section
+ *
+ * Allows administrators to manually trigger database migrations
+ * after:
+ * - Manual Emoncms updates
+ * - Module installations
+ * - Schema consistency checks
+ */
+
     // -------------------
     ?>
     <aside class="d-md-flex justify-content-between align-items-center pb-md-2 border-top pb-md-0 text-right pb-2 border-top px-1">
@@ -114,7 +179,18 @@ global $settings;
     </aside>
 
     <?php
-    // UPDATE LOG FILE VIEWER
+    /**
+ * Update Log Viewer
+ *
+ * Displays real-time output from the backend update process.
+ * Supports:
+ * - Auto-refresh polling
+ * - Manual log download
+ * - Clipboard copying for diagnostics
+ *
+ * This log is essential for debugging failed or long-running updates.
+ */
+
     // -------------------
     //if (is_file($update_log_filename)) { ?>
     <div id="update-logfile-view" class="hide">
@@ -162,20 +238,36 @@ $("#copyupdatelogfile").on('click', function(event) {
 
 var updates_log_interval;
 
-// stop updates if interval == 0
+/**
+ * Starts or restarts the update log polling interval.
+ *
+ * @param {Function} func - Function to execute periodically
+ * @param {number} interval - Polling interval in milliseconds
+ *
+ * Ensures only one active polling interval exists at a time.
+ */
 function refresherStart(func, interval){
     clearInterval(updates_log_interval);
     updates_log_interval = setInterval(func, interval);
 }
 
-// display content in container and scroll to the bottom
+/**
+ * Renders update log output and auto-scrolls to the latest entry.
+ *
+ * @param {string} result - Log output content
+ * @param {jQuery} $container - Target container for rendering
+ */
 function output_logfile(result, $container){
     $container.html(result);
     scrollable = $container.parent('pre')[0];
     if(scrollable) scrollable.scrollTop = scrollable.scrollHeight;
 }
 
-// push value to updates logfile viewer
+/**
+ * Updates the visible update log viewer and ensures it is displayed.
+ *
+ * @param {string} result - Latest log output or error message
+ */
 function refresh_updateLog(result){
     output_logfile(result, $("#update-log"));
     $("#update-logfile-view").slideDown();
@@ -292,6 +384,13 @@ $("#custom_firmware").change(function(){
     });
 });
 
+    /**
+ * Populates the firmware selection dropdown based on:
+ * - Selected hardware
+ * - Selected radio format
+ *
+ * Uses firmware metadata provided by the backend.
+ */
 function draw_firmware_select_list() {
     refresh_updateLog("");
     var hardware = $("#selected_hardware").val();
@@ -344,6 +443,18 @@ $('[data-dismiss="log"]').click(function(event){
     $(this).parents('pre').first().addClass('small');
 })
 getUpdateLog();
+    
+    /**
+ * Fetches the latest update log output from the backend.
+ *
+ * Behavior:
+ * - Requests log data via AJAX
+ * - Handles JSON responses for authentication or error states
+ * - Displays raw log output when valid
+ * - Automatically stops polling when update completion is detected
+ *
+ * This function is central to update traceability and debugging.
+ */
 function getUpdateLog() {
   $.ajax({ url: path+"admin/update-log", async: true, dataType: "text", success: function(result)
     {
@@ -369,6 +480,14 @@ function getUpdateLog() {
     }
   });
 }
+    /**
+ * Copies update log content to the system clipboard.
+ *
+ * @param {string} text - Text to be copied
+ * @param {string} message - Optional user feedback message
+ *
+ * Masks sensitive data before copying where applicable.
+ */
 function copyTextToClipboard(text, message) {
   var textArea = document.createElement("textarea");
   textArea.style.position = 'fixed';

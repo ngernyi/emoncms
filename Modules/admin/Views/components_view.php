@@ -1,4 +1,15 @@
 <?php 
+/**
+ * Emoncms Components Page
+ *
+ * Allows selective update of system components and branch switching.
+ *
+ * Actions logged:
+ *  - Component branch switch
+ *  - Component update
+ *  - Update all components
+ *  - Log refresh
+ */
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path;
 ?>
@@ -81,6 +92,20 @@ var app = new Vue({
     }
 });
 
+    /**
+ * Update a single system component by calling the backend API.
+ *
+ * Sends an AJAX request to the `component-update` endpoint with
+ * the component name and desired branch. On success, starts
+ * refreshing the update log to show progress. Handles errors
+ * and reauthentication if needed.
+ *
+ * @param {string} name   The component name to update.
+ * @param {string} branch The branch to switch/update the component to.
+ *
+ * @return {void} This function does not return a value; updates
+ *                logs and triggers UI changes asynchronously.
+ */
 function component_update(name,branch) {
     $.ajax({                                      
         url: path+'admin/component-update',                         
@@ -101,6 +126,19 @@ function component_update(name,branch) {
     });   
 }
 
+    /**
+ * Update all system components to the specified branch by calling the backend API.
+ *
+ * Sends an AJAX request to the `components-update-all` endpoint with
+ * the target branch. On success, starts refreshing the update log
+ * to show progress for all components. Handles errors and reauthentication
+ * if needed.
+ *
+ * @param {string} branch The branch to which all components should be updated.
+ *
+ * @return {void} This function does not return a value; it updates
+ *                logs and triggers UI changes asynchronously.
+ */
 function update_all_components(branch) {
     $.ajax({                                      
         url: path+'admin/components-update-all',
