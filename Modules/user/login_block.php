@@ -119,7 +119,7 @@ global $path, $settings;
 menu.disable();
 
 var verify = <?php echo json_encode($verify); ?>;
-var register_open = false;
+var register_open = true;
 $("body").addClass("body-login");
 
 if (verify.success!=undefined) {
@@ -133,6 +133,11 @@ if (verify.success!=undefined) {
 var passwordreset = "<?php echo $settings['interface']['enable_password_reset']; ?>";
 $(document).ready(function() {
     if (!passwordreset) $("#passwordreset-link").hide();
+    //  // Reset login/register form visibility
+    // $(".login-item").hide();         // show login fields
+    // $(".register-item").show();       // hide registration fields
+    // $("#register-link").hide();       // show the register link/button
+    // register_open = true;            // reset register state
 });
 
 $("#passwordreset-link").on("click", function(){
@@ -207,29 +212,25 @@ function login(){
     var referrer = $("input[name='referrer']").val();
     var rememberme = 0; if ($("#rememberme").is(":checked")) rememberme = 1;
 
-    var result = user.login(username,password,rememberme,referrer);
-
-    if (result.success==undefined) {
-        $("#loginmessage").html("<div class='alert alert-error'>"+result+"</div>");
-        return false;
-    
-    } else {
+    user.login(username,password,rememberme,referrer, function(result){
+        if (!result || result.success===undefined) {
+            $("#loginmessage").html("<div class='alert alert-error'>"+result+"</div>");
+            return;
+        }
+        
         if (result.success)
         {
             var href = result.hasOwnProperty('startingpage') ? path+result.startingpage: path; 
             window.location.href = href;
-            return true;
+            return;
         }
-        else
-        {
-            if (result.message=="Please verify email address") {
-                $("#loginmessage").html("<div class='alert alert-error'>"+result.message+"<br><br><button class='btn resend-verify' style='float:right'>Resend</button>Click to resend<br>verification email:</div>");
-            } else {
-                $("#loginmessage").html("<div class='alert alert-error'>"+result.message+"</div>");
-            }
-            return false;
+        
+        if (result.message=="Please verify email address") {
+            $("#loginmessage").html("<div class='alert alert-error'>"+result.message+"<br><br><button class='btn resend-verify' style='float:right'>Resend</button>Click to resend<br>verification email:</div>");
+        } else {
+            $("#loginmessage").html("<div class='alert alert-error'>"+result.message+"</div>");
         }
-    }
+    });
 }
 
 function register(){
@@ -251,28 +252,31 @@ function register(){
             console.log(user_timezone);
         }
             
-        var result = user.register(username,password,email,user_timezone);
-
-        if (result.success==undefined) {
-            $("#loginmessage").html("<div class='alert alert-error'>"+result+"</div>");
-            return false;
-        
-        } else {
-            if (result.success) {
-                if (result.verifyemail) {
-                    $(".login-item").show();
-                    $(".register-item").hide();
-                    $("#loginmessage").html("");
-                    register_open = false;
-                    $("#loginmessage").html("<div class='alert alert-success'>"+result.message+"</div>");
-                } else {
-                    login();
-                }
-                
+        // CALL REGISTER ASYNC WITH CALLBACK
+        user.register(username, password, email, user_timezone, function(result){
+            
+            // Logic moved inside this callback function
+            if (result.success==undefined) {
+                $("#loginmessage").html("<div class='alert alert-error'>"+result+"</div>");
+                return false;
+            
             } else {
-                $("#loginmessage").html("<div class='alert alert-error'>"+result.message+"</div>");
+                if (result.success) {
+                    if (result.verifyemail) {
+                        $(".login-item").show();
+                        $(".register-item").hide();
+                        $("#loginmessage").html("");
+                        register_open = false;
+                        $("#loginmessage").html("<div class='alert alert-success'>"+result.message+"</div>");
+                    } else {
+                        login();
+                    }
+                    
+                } else {
+                    $("#loginmessage").html("<div class='alert alert-error'>"+result.message+"</div>");
+                }
             }
-        }
+        });
     }
 }
 
